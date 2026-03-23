@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <radialGradient id="sqs3-bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a1030"/>
+      <stop offset="100%" stop-color="#0A0A0F"/>
+    </radialGradient>
+    <filter id="sqs3-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="sqs3-item-rare" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7B61FF"/>
+      <stop offset="100%" stop-color="#3a2080"/>
+    </linearGradient>
+    <linearGradient id="sqs3-item-epic" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff8800"/>
+      <stop offset="100%" stop-color="#884400"/>
+    </linearGradient>
+    <linearGradient id="sqs3-item-legendary" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffdd00"/>
+      <stop offset="100%" stop-color="#886600"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="720" fill="url(#sqs3-bg)"/>
+
+  <!-- Character Inventory Screen -->
+  <!-- Header -->
+  <rect x="0" y="0" width="1280" height="60" fill="#0d0a18" opacity="0.9"/>
+  <text x="640" y="40" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="26" fill="#7B61FF" filter="url(#sqs3-glow)" letter-spacing="3">CHARACTER &amp; INVENTORY</text>
+
+  <!-- Left panel - Character -->
+  <g transform="translate(40, 80)">
+    <rect x="0" y="0" width="360" height="560" rx="12" fill="#0d0a18" opacity="0.8" stroke="#7B61FF" stroke-width="1.5"/>
+
+    <!-- Character silhouette -->
+    <g transform="translate(180, 200)">
+      <circle cx="0" cy="-80" r="30" fill="#1a0a30" stroke="#7B61FF" stroke-width="1.5"/>
+      <circle cx="-8" cy="-84" r="3" fill="#7B61FF"/>
+      <circle cx="8" cy="-84" r="3" fill="#7B61FF"/>
+      <rect x="-25" y="-45" width="50" height="80" rx="5" fill="#1a0a30" stroke="#7B61FF" stroke-width="1.5"/>
+      <rect x="-15" y="40" width="12" height="50" rx="3" fill="#1a0a30" stroke="#7B61FF" stroke-width="1"/>
+      <rect x="3" y="40" width="12" height="50" rx="3" fill="#1a0a30" stroke="#7B61FF" stroke-width="1"/>
+    </g>
+
+    <!-- Equipment slots around character -->
+    <!-- Helmet -->
+    <rect x="152" y="85" width="56" height="56" rx="6" fill="#1a1530" stroke="#7B61FF" stroke-width="1.5"/>
+    <text x="180" y="118" text-anchor="middle" font-family="Georgia, serif" font-size="24" fill="#7B61FF" opacity="0.4">&#x2302;</text>
+    <!-- Weapon -->
+    <rect x="60" y="170" width="56" height="56" rx="6" fill="#1a1530" stroke="url(#sqs3-item-epic)" stroke-width="2"/>
+    <text x="88" y="205" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#ff8800">&#x2694;</text>
+    <!-- Shield -->
+    <rect x="244" y="170" width="56" height="56" rx="6" fill="#1a1530" stroke="url(#sqs3-item-rare)" stroke-width="2"/>
+    <text x="272" y="205" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#7B61FF">&#x25C6;</text>
+    <!-- Armor -->
+    <rect x="152" y="260" width="56" height="56" rx="6" fill="#1a1530" stroke="url(#sqs3-item-legendary)" stroke-width="2"/>
+    <text x="180" y="295" text-anchor="middle" font-family="Georgia, serif" font-size="24" fill="#ffdd00">&#x2666;</text>
+    <!-- Boots -->
+    <rect x="152" y="340" width="56" height="56" rx="6" fill="#1a1530" stroke="#7B61FF" stroke-width="1.5"/>
+    <text x="180" y="375" text-anchor="middle" font-family="Georgia, serif" font-size="24" fill="#7B61FF" opacity="0.4">&#x25BD;</text>
+
+    <!-- Character stats -->
+    <g transform="translate(20, 420)">
+      <text x="0" y="0" font-family="Georgia, serif" font-size="16" fill="#FFFFFF" font-weight="700">Shadow Mage - Lv. 23</text>
+      <text x="0" y="28" font-family="Georgia, serif" font-size="13" fill="#ff6666">STR: 24</text>
+      <text x="100" y="28" font-family="Georgia, serif" font-size="13" fill="#7B61FF">INT: 67</text>
+      <text x="200" y="28" font-family="Georgia, serif" font-size="13" fill="#39FF14">DEX: 35</text>
+      <text x="0" y="52" font-family="Georgia, serif" font-size="13" fill="#ffaa00">VIT: 42</text>
+      <text x="100" y="52" font-family="Georgia, serif" font-size="13" fill="#00F0FF">WIS: 58</text>
+      <text x="200" y="52" font-family="Georgia, serif" font-size="13" fill="#c4a0ff">LCK: 31</text>
+      <line x1="0" y1="65" x2="320" y2="65" stroke="#7B61FF" stroke-width="0.5" opacity="0.3"/>
+      <text x="0" y="85" font-family="Georgia, serif" font-size="12" fill="#888">ATK: 245  |  DEF: 189  |  MDEF: 312</text>
+      <text x="0" y="105" font-family="Georgia, serif" font-size="12" fill="#888">CRIT: 18%  |  EVA: 12%</text>
+    </g>
+  </g>
+
+  <!-- Right panel - Inventory grid -->
+  <g transform="translate(440, 80)">
+    <rect x="0" y="0" width="800" height="560" rx="12" fill="#0d0a18" opacity="0.8" stroke="#7B61FF" stroke-width="1.5"/>
+
+    <!-- Tabs -->
+    <g font-family="Georgia, serif" font-size="14">
+      <rect x="20" y="15" width="80" height="30" rx="4" fill="#7B61FF" opacity="0.3"/>
+      <text x="60" y="35" text-anchor="middle" fill="#FFFFFF">All</text>
+      <text x="140" y="35" text-anchor="middle" fill="#666">Weapons</text>
+      <text x="230" y="35" text-anchor="middle" fill="#666">Armor</text>
+      <text x="310" y="35" text-anchor="middle" fill="#666">Potions</text>
+      <text x="400" y="35" text-anchor="middle" fill="#666">Materials</text>
+    </g>
+
+    <!-- Inventory grid 8x5 -->
+    <g transform="translate(20, 60)">
+      <!-- Row 1 -->
+      <rect x="0" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#7B61FF" stroke-width="1"/>
+      <text x="35" y="45" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#7B61FF">&#x2694;</text>
+      <rect x="80" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#ff8800" stroke-width="1.5"/>
+      <text x="115" y="45" text-anchor="middle" font-family="Georgia, serif" font-size="30" fill="#ff8800">&#x2620;</text>
+      <rect x="160" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#7B61FF" stroke-width="1"/>
+      <text x="195" y="45" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#7B61FF">&#x2726;</text>
+      <rect x="240" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#39FF14" stroke-width="1"/>
+      <text x="275" y="45" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#39FF14">&#x2618;</text>
+      <text x="300" y="65" font-family="Arial, sans-serif" font-size="10" fill="#39FF14">x5</text>
+      <rect x="320" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#ff3333" stroke-width="1"/>
+      <text x="355" y="45" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#ff3333">&#x2665;</text>
+      <text x="380" y="65" font-family="Arial, sans-serif" font-size="10" fill="#ff3333">x12</text>
+      <rect x="400" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#ffdd00" stroke-width="2"/>
+      <text x="435" y="45" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#ffdd00">&#x2736;</text>
+      <rect x="480" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+      <rect x="560" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+      <rect x="640" y="0" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+      <rect x="720" y="0" width="45" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+
+      <!-- Row 2-5 (empty slots) -->
+      <g opacity="0.4">
+        <!-- Row 2 -->
+        <rect x="0" y="80" width="70" height="70" rx="4" fill="#1a1530" stroke="#7B61FF" stroke-width="1"/>
+        <text x="35" y="125" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#7B61FF">&#x25C6;</text>
+        <rect x="80" y="80" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="160" y="80" width="70" height="70" rx="4" fill="#1a1530" stroke="#ff8800" stroke-width="1"/>
+        <text x="195" y="125" text-anchor="middle" font-family="Georgia, serif" font-size="28" fill="#ff8800">&#x2302;</text>
+        <rect x="240" y="80" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="320" y="80" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="400" y="80" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="480" y="80" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="560" y="80" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <!-- Rows 3-5 -->
+        <rect x="0" y="160" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="80" y="160" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="160" y="160" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="240" y="160" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="320" y="160" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="400" y="160" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="480" y="160" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+        <rect x="560" y="160" width="70" height="70" rx="4" fill="#1a1530" stroke="#555" stroke-width="0.5"/>
+      </g>
+    </g>
+
+    <!-- Item detail tooltip -->
+    <g transform="translate(20, 380)">
+      <rect x="0" y="0" width="740" height="160" rx="8" fill="#12101a" stroke="#ff8800" stroke-width="1.5"/>
+      <text x="20" y="30" font-family="Georgia, serif" font-weight="700" font-size="18" fill="#ff8800">Shadowflame Staff</text>
+      <text x="20" y="50" font-family="Georgia, serif" font-size="12" fill="#ff8800" opacity="0.7">Epic Weapon - Two-Handed Staff</text>
+      <line x1="20" y1="60" x2="720" y2="60" stroke="#ff8800" stroke-width="0.5" opacity="0.3"/>
+      <text x="20" y="82" font-family="Georgia, serif" font-size="14" fill="#FFFFFF">Magic Attack: +145</text>
+      <text x="20" y="102" font-family="Georgia, serif" font-size="14" fill="#c4a0ff">Intelligence: +22</text>
+      <text x="20" y="122" font-family="Georgia, serif" font-size="14" fill="#7B61FF">Shadow Damage: +15%</text>
+      <text x="20" y="146" font-family="Georgia, serif" font-size="12" fill="#888" font-style="italic">"Forged in the eternal darkness of the Void..."</text>
+      <text x="720" y="146" text-anchor="end" font-family="Georgia, serif" font-size="12" fill="#ffdd00">Sell: 2,450g</text>
+    </g>
+  </g>
+
+  <!-- Gold display -->
+  <g transform="translate(1080, 660)">
+    <rect x="0" y="0" width="160" height="40" rx="6" fill="#0d0a18" stroke="#ffdd00" stroke-width="1"/>
+    <text x="25" y="26" font-family="Georgia, serif" font-size="20" fill="#ffdd00">&#x25C9;</text>
+    <text x="45" y="27" font-family="Georgia, serif" font-weight="700" font-size="16" fill="#ffdd00">18,750</text>
+  </g>
+
+  <!-- Bottom nav tabs -->
+  <rect x="0" y="660" width="1280" height="60" fill="#0A0A0F" opacity="0.9"/>
+  <g font-family="Georgia, serif" font-size="13" fill="#666">
+    <text x="160" y="695" text-anchor="middle">SKILLS</text>
+    <text x="400" y="695" text-anchor="middle" fill="#7B61FF">INVENTORY</text>
+    <text x="640" y="695" text-anchor="middle">QUESTS</text>
+    <text x="880" y="695" text-anchor="middle">MAP</text>
+  </g>
+  <rect x="365" y="685" width="70" height="3" rx="1" fill="#7B61FF"/>
+</svg>

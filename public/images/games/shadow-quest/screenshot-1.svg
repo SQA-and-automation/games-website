@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <radialGradient id="sqs1-light" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#2a1545"/>
+      <stop offset="100%" stop-color="#0A0A0F"/>
+    </radialGradient>
+    <radialGradient id="sqs1-torch" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7B61FF" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#7B61FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sqs1-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="sqs1-strong">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background dungeon -->
+  <rect width="1280" height="720" fill="url(#sqs1-light)"/>
+
+  <!-- Stone walls -->
+  <g fill="#12101a" opacity="0.8">
+    <rect x="0" y="0" width="180" height="720"/>
+    <rect x="1100" y="0" width="180" height="720"/>
+    <rect x="0" y="0" width="1280" height="80"/>
+  </g>
+
+  <!-- Wall texture lines -->
+  <g stroke="#1a1830" stroke-width="1" opacity="0.5">
+    <line x1="180" y1="0" x2="180" y2="720"/>
+    <line x1="1100" y1="0" x2="1100" y2="720"/>
+    <!-- Horizontal stone lines -->
+    <line x1="0" y1="120" x2="180" y2="120"/>
+    <line x1="0" y1="240" x2="180" y2="240"/>
+    <line x1="0" y1="360" x2="180" y2="360"/>
+    <line x1="0" y1="480" x2="180" y2="480"/>
+    <line x1="1100" y1="150" x2="1280" y2="150"/>
+    <line x1="1100" y1="300" x2="1280" y2="300"/>
+    <line x1="1100" y1="450" x2="1280" y2="450"/>
+  </g>
+
+  <!-- Torch lights on walls -->
+  <circle cx="180" cy="200" r="80" fill="url(#sqs1-torch)"/>
+  <circle cx="180" cy="450" r="80" fill="url(#sqs1-torch)"/>
+  <circle cx="1100" cy="250" r="80" fill="url(#sqs1-torch)"/>
+  <circle cx="1100" cy="500" r="80" fill="url(#sqs1-torch)"/>
+
+  <!-- Torch flames -->
+  <g filter="url(#sqs1-glow)">
+    <ellipse cx="180" cy="195" rx="6" ry="12" fill="#7B61FF" opacity="0.8"/>
+    <ellipse cx="180" cy="445" rx="6" ry="12" fill="#7B61FF" opacity="0.8"/>
+    <ellipse cx="1100" cy="245" rx="6" ry="12" fill="#7B61FF" opacity="0.8"/>
+    <ellipse cx="1100" cy="495" rx="6" ry="12" fill="#7B61FF" opacity="0.8"/>
+  </g>
+
+  <!-- Floor tiles -->
+  <g fill="#0f0d18" opacity="0.5">
+    <rect x="180" y="580" width="920" height="140"/>
+  </g>
+  <g stroke="#1a1830" stroke-width="1" opacity="0.3">
+    <line x1="180" y1="580" x2="1100" y2="580"/>
+    <line x1="300" y1="580" x2="300" y2="720"/>
+    <line x1="420" y1="580" x2="420" y2="720"/>
+    <line x1="540" y1="580" x2="540" y2="720"/>
+    <line x1="660" y1="580" x2="660" y2="720"/>
+    <line x1="780" y1="580" x2="780" y2="720"/>
+    <line x1="900" y1="580" x2="900" y2="720"/>
+    <line x1="1020" y1="580" x2="1020" y2="720"/>
+  </g>
+
+  <!-- Player character (abstract shadow figure) -->
+  <g transform="translate(450, 420)" filter="url(#sqs1-strong)">
+    <!-- Shadow aura -->
+    <ellipse cx="0" cy="50" rx="40" ry="10" fill="#7B61FF" opacity="0.2"/>
+    <!-- Body -->
+    <rect x="-15" y="-30" width="30" height="60" rx="4" fill="#2a1545" stroke="#7B61FF" stroke-width="1.5"/>
+    <!-- Head -->
+    <circle cx="0" cy="-45" r="18" fill="#1a0a30" stroke="#7B61FF" stroke-width="1.5"/>
+    <!-- Eyes -->
+    <circle cx="-6" cy="-48" r="3" fill="#7B61FF"/>
+    <circle cx="6" cy="-48" r="3" fill="#7B61FF"/>
+    <!-- Staff -->
+    <line x1="25" y1="-60" x2="25" y2="40" stroke="#7B61FF" stroke-width="3"/>
+    <circle cx="25" cy="-65" r="8" fill="#7B61FF" opacity="0.6" filter="url(#sqs1-glow)"/>
+  </g>
+
+  <!-- Enemy creature -->
+  <g transform="translate(820, 400)" opacity="0.8">
+    <!-- Shadow blob body -->
+    <ellipse cx="0" cy="60" rx="50" ry="12" fill="#330033" opacity="0.3"/>
+    <path d="M-35,0 Q-40,-50 -20,-60 Q0,-70 20,-60 Q40,-50 35,0 Q30,50 0,55 Q-30,50 -35,0Z" fill="#1a0020" stroke="#7B61FF" stroke-width="1" opacity="0.6"/>
+    <!-- Red eyes -->
+    <circle cx="-10" cy="-20" r="5" fill="#ff3333" opacity="0.9"/>
+    <circle cx="10" cy="-20" r="5" fill="#ff3333" opacity="0.9"/>
+  </g>
+
+  <!-- Magic projectile between player and enemy -->
+  <g filter="url(#sqs1-strong)">
+    <circle cx="640" cy="400" r="12" fill="#7B61FF"/>
+    <circle cx="640" cy="400" r="6" fill="#c4a0ff"/>
+    <line x1="500" y1="405" x2="620" y2="400" stroke="#7B61FF" stroke-width="2" opacity="0.5" stroke-dasharray="8 4"/>
+  </g>
+
+  <!-- HUD - Health bar -->
+  <g transform="translate(40, 640)">
+    <text x="0" y="0" font-family="Georgia, serif" font-size="12" fill="#7B61FF" opacity="0.7">HEALTH</text>
+    <rect x="0" y="8" width="250" height="14" rx="4" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1" opacity="0.7"/>
+    <rect x="2" y="10" width="180" height="10" rx="3" fill="#cc3333" opacity="0.8"/>
+  </g>
+
+  <!-- HUD - Mana bar -->
+  <g transform="translate(40, 675)">
+    <text x="0" y="0" font-family="Georgia, serif" font-size="12" fill="#7B61FF" opacity="0.7">MANA</text>
+    <rect x="0" y="8" width="250" height="14" rx="4" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1" opacity="0.7"/>
+    <rect x="2" y="10" width="140" height="10" rx="3" fill="#7B61FF" opacity="0.8"/>
+  </g>
+
+  <!-- HUD - Level -->
+  <g transform="translate(560, 20)">
+    <rect x="0" y="0" width="160" height="40" rx="8" fill="#0A0A0F" opacity="0.8" stroke="#7B61FF" stroke-width="1.5"/>
+    <text x="80" y="15" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#7B61FF" opacity="0.7">DUNGEON LEVEL</text>
+    <text x="80" y="33" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="16" fill="#FFFFFF">Floor 7</text>
+  </g>
+
+  <!-- Ability slots bottom center -->
+  <g transform="translate(490, 660)">
+    <rect x="0" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1.5"/>
+    <circle cx="25" cy="25" r="12" fill="#7B61FF" opacity="0.4"/>
+    <rect x="65" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1.5"/>
+    <polygon points="90,12 97,28 83,28" fill="#7B61FF" opacity="0.4"/>
+    <rect x="130" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1.5"/>
+    <rect x="143" y="13" width="24" height="24" rx="3" fill="#7B61FF" opacity="0.4"/>
+    <rect x="195" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1.5"/>
+    <path d="M220,12 L228,25 L220,38 L212,25Z" fill="#7B61FF" opacity="0.4"/>
+    <rect x="260" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#333" stroke-width="1"/>
+    <text x="285" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#333">?</text>
+  </g>
+
+  <!-- XP bar top -->
+  <rect x="300" y="65" width="680" height="6" rx="3" fill="#1a1a2e"/>
+  <rect x="300" y="65" width="410" height="6" rx="3" fill="#7B61FF" opacity="0.6"/>
+  <text x="640" y="60" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#c4a0ff">Level 23 - 4,200 / 7,000 XP</text>
+
+  <!-- Minimap -->
+  <g transform="translate(1130, 20)">
+    <rect x="0" y="0" width="120" height="120" rx="8" fill="#0A0A0F" opacity="0.8" stroke="#7B61FF" stroke-width="1.5"/>
+    <!-- Rooms -->
+    <rect x="15" y="15" width="20" height="20" fill="#7B61FF" opacity="0.3"/>
+    <rect x="45" y="15" width="20" height="20" fill="#7B61FF" opacity="0.3"/>
+    <rect x="15" y="50" width="20" height="20" fill="#7B61FF" opacity="0.3"/>
+    <rect x="50" y="45" width="25" height="30" fill="#7B61FF" opacity="0.5"/>
+    <rect x="85" y="50" width="20" height="20" fill="#7B61FF" opacity="0.2"/>
+    <rect x="45" y="85" width="20" height="20" fill="#7B61FF" opacity="0.2"/>
+    <!-- Corridors -->
+    <rect x="35" y="22" width="10" height="4" fill="#7B61FF" opacity="0.2"/>
+    <rect x="22" y="35" width="4" height="15" fill="#7B61FF" opacity="0.2"/>
+    <rect x="75" y="58" width="10" height="4" fill="#7B61FF" opacity="0.2"/>
+    <!-- Player dot -->
+    <circle cx="62" cy="60" r="3" fill="#FFFFFF"/>
+  </g>
+</svg>

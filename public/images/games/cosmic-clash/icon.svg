@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="cc-bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1a0a1f"/>
+      <stop offset="100%" stop-color="#0A0A0F"/>
+    </radialGradient>
+    <radialGradient id="cc-star-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF00E5" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FF00E5" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cc-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff60f0"/>
+      <stop offset="100%" stop-color="#FF00E5"/>
+    </linearGradient>
+    <linearGradient id="cc-rocket" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#FF00E5"/>
+      <stop offset="100%" stop-color="#aa00a0"/>
+    </linearGradient>
+    <filter id="cc-glow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="cc-soft">
+      <feGaussianBlur stdDeviation="15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="url(#cc-bg)"/>
+
+  <!-- Stars -->
+  <g fill="#ffffff">
+    <circle cx="80" cy="60" r="1.5" opacity="0.8"/>
+    <circle cx="150" cy="100" r="1" opacity="0.5"/>
+    <circle cx="430" cy="80" r="1.8" opacity="0.7"/>
+    <circle cx="380" cy="150" r="1.2" opacity="0.6"/>
+    <circle cx="50" cy="200" r="1" opacity="0.4"/>
+    <circle cx="460" cy="250" r="1.5" opacity="0.5"/>
+    <circle cx="100" cy="320" r="1.3" opacity="0.6"/>
+    <circle cx="420" cy="350" r="1" opacity="0.4"/>
+    <circle cx="200" cy="70" r="1.4" opacity="0.7"/>
+    <circle cx="320" cy="50" r="1" opacity="0.5"/>
+    <circle cx="70" cy="400" r="1.2" opacity="0.4"/>
+    <circle cx="450" cy="430" r="1.5" opacity="0.3"/>
+    <circle cx="350" cy="420" r="1" opacity="0.5"/>
+    <circle cx="170" cy="450" r="0.8" opacity="0.4"/>
+  </g>
+
+  <!-- Nebula glow -->
+  <circle cx="256" cy="220" r="150" fill="url(#cc-star-glow)" filter="url(#cc-soft)"/>
+
+  <!-- Rocket ship -->
+  <g transform="translate(256, 230)" filter="url(#cc-glow)">
+    <!-- Main body -->
+    <path d="M0,-120 C20,-100 25,-60 25,20 L15,50 L-15,50 L-25,20 C-25,-60 -20,-100 0,-120Z" fill="url(#cc-rocket)"/>
+    <!-- Nose cone highlight -->
+    <path d="M0,-120 C10,-105 14,-80 14,-50 L-14,-50 C-14,-80 -10,-105 0,-120Z" fill="#ffffff" opacity="0.3"/>
+    <!-- Window -->
+    <circle cx="0" cy="-40" r="12" fill="#0A0A0F" stroke="#FF00E5" stroke-width="2"/>
+    <circle cx="0" cy="-40" r="6" fill="#FF00E5" opacity="0.5"/>
+    <!-- Fins -->
+    <path d="M-25,10 L-50,55 L-25,45Z" fill="#FF00E5" opacity="0.8"/>
+    <path d="M25,10 L50,55 L25,45Z" fill="#FF00E5" opacity="0.8"/>
+    <!-- Flame -->
+    <path d="M-12,50 Q-15,80 0,110 Q15,80 12,50Z" fill="#FF00E5" opacity="0.7"/>
+    <path d="M-8,50 Q-10,75 0,95 Q10,75 8,50Z" fill="#ff80f0"/>
+    <path d="M-4,50 Q-5,68 0,80 Q5,68 4,50Z" fill="#ffffff" opacity="0.8"/>
+  </g>
+
+  <!-- Orbital rings -->
+  <g fill="none" stroke="#FF00E5" opacity="0.2" stroke-width="1.5">
+    <ellipse cx="256" cy="230" rx="170" ry="40" transform="rotate(-20 256 230)"/>
+    <ellipse cx="256" cy="230" rx="170" ry="40" transform="rotate(20 256 230)"/>
+  </g>
+
+  <!-- Sparkle accents -->
+  <g filter="url(#cc-glow)" fill="#FF00E5">
+    <polygon points="130,160 133,168 140,168 134,173 137,182 130,176 123,182 126,173 120,168 127,168" opacity="0.7"/>
+    <polygon points="390,180 393,188 400,188 394,193 397,202 390,196 383,202 386,193 380,188 387,188" opacity="0.6"/>
+  </g>
+
+  <!-- Game title -->
+  <text x="256" y="420" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="50" fill="url(#cc-accent)" filter="url(#cc-glow)" letter-spacing="2">COSMIC</text>
+  <text x="256" y="472" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="44" fill="#ffd0fa" letter-spacing="6">CLASH</text>
+</svg>

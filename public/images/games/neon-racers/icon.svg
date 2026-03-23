@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="nr-bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0A0A0F"/>
+    </radialGradient>
+    <linearGradient id="nr-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#0080FF"/>
+    </linearGradient>
+    <linearGradient id="nr-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#00F0FF" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#00F0FF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="nr-neon">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="nr-glow-filter">
+      <feGaussianBlur stdDeviation="8"/>
+      <feComposite in="SourceGraphic" in2="" operator="over"/>
+    </filter>
+    <filter id="nr-strong-glow">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="url(#nr-bg)"/>
+
+  <!-- Grid lines for road feel -->
+  <g opacity="0.15" stroke="#00F0FF" stroke-width="1">
+    <line x1="0" y1="480" x2="256" y2="200"/>
+    <line x1="512" y1="480" x2="256" y2="200"/>
+    <line x1="60" y1="480" x2="256" y2="200"/>
+    <line x1="452" y1="480" x2="256" y2="200"/>
+    <line x1="120" y1="480" x2="256" y2="200"/>
+    <line x1="392" y1="480" x2="256" y2="200"/>
+    <!-- Horizontal lines -->
+    <line x1="80" y1="380" x2="432" y2="380"/>
+    <line x1="130" y1="330" x2="382" y2="330"/>
+    <line x1="170" y1="290" x2="342" y2="290"/>
+    <line x1="200" y1="255" x2="312" y2="255"/>
+  </g>
+
+  <!-- Speed lines -->
+  <g filter="url(#nr-neon)">
+    <line x1="80" y1="180" x2="200" y2="230" stroke="#00F0FF" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+    <line x1="60" y1="220" x2="180" y2="260" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    <line x1="312" y1="230" x2="432" y2="180" stroke="#00F0FF" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+    <line x1="332" y1="260" x2="452" y2="220" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  </g>
+
+  <!-- Abstract car shape - chevron/arrow pointing up -->
+  <g filter="url(#nr-strong-glow)">
+    <polygon points="256,120 320,280 290,280 256,200 222,280 192,280" fill="url(#nr-accent)" opacity="0.9"/>
+    <!-- Side wings -->
+    <polygon points="192,280 160,340 210,310 222,280" fill="#00F0FF" opacity="0.7"/>
+    <polygon points="320,280 352,340 302,310 290,280" fill="#00F0FF" opacity="0.7"/>
+  </g>
+
+  <!-- Horizontal neon stripe -->
+  <rect x="100" y="350" width="312" height="4" rx="2" fill="url(#nr-glow)" filter="url(#nr-neon)"/>
+
+  <!-- Game title -->
+  <text x="256" y="420" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="52" fill="#00F0FF" filter="url(#nr-neon)" letter-spacing="4">NEON</text>
+  <text x="256" y="468" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="40" fill="#FFFFFF" letter-spacing="8">RACERS</text>
+
+  <!-- Corner accents -->
+  <path d="M30,80 L30,30 L80,30" fill="none" stroke="#00F0FF" stroke-width="3" opacity="0.6"/>
+  <path d="M432,30 L482,30 L482,80" fill="none" stroke="#00F0FF" stroke-width="3" opacity="0.6"/>
+  <path d="M30,432 L30,482 L80,482" fill="none" stroke="#00F0FF" stroke-width="3" opacity="0.6"/>
+  <path d="M432,482 L482,482 L482,432" fill="none" stroke="#00F0FF" stroke-width="3" opacity="0.6"/>
+</svg>

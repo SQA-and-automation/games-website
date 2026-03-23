@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="pls2-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0A0A0F"/>
+      <stop offset="100%" stop-color="#0a150a"/>
+    </linearGradient>
+    <filter id="pls2-glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#pls2-bg)"/>
+
+  <!-- Battle scene - two armies facing off -->
+
+  <!-- Terrain - flat battlefield -->
+  <rect x="0" y="480" width="1280" height="240" fill="#0a120a"/>
+  <g fill="#39FF14" opacity="0.1">
+    <rect x="0" y="480" width="1280" height="3"/>
+  </g>
+
+  <!-- Left army (player - green) -->
+  <g filter="url(#pls2-glow)">
+    <!-- Warriors row 1 -->
+    <g fill="#39FF14">
+      <rect x="100" y="420" width="12" height="18"/><rect x="100" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="130" y="420" width="12" height="18"/><rect x="130" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="160" y="420" width="12" height="18"/><rect x="160" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="190" y="420" width="12" height="18"/><rect x="190" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="220" y="420" width="12" height="18"/><rect x="220" y="410" width="12" height="8" opacity="0.7"/>
+    </g>
+    <!-- Warriors row 2 -->
+    <g fill="#39FF14" opacity="0.7">
+      <rect x="115" y="450" width="12" height="18"/><rect x="115" y="440" width="12" height="8"/>
+      <rect x="145" y="450" width="12" height="18"/><rect x="145" y="440" width="12" height="8"/>
+      <rect x="175" y="450" width="12" height="18"/><rect x="175" y="440" width="12" height="8"/>
+      <rect x="205" y="450" width="12" height="18"/><rect x="205" y="440" width="12" height="8"/>
+    </g>
+    <!-- Archers behind -->
+    <g fill="#70ff50" opacity="0.6">
+      <rect x="60" y="455" width="10" height="16"/>
+      <rect x="80" y="455" width="10" height="16"/>
+      <rect x="240" y="455" width="10" height="16"/>
+      <rect x="260" y="455" width="10" height="16"/>
+    </g>
+    <!-- Hero unit (larger) -->
+    <g fill="#39FF14">
+      <rect x="280" y="390" width="20" height="28"/>
+      <rect x="280" y="376" width="20" height="12"/>
+      <!-- Sword -->
+      <rect x="302" y="380" width="4" height="30" fill="#ffffff" opacity="0.7"/>
+    </g>
+  </g>
+
+  <!-- Right army (enemy - red) -->
+  <g>
+    <!-- Warriors row 1 -->
+    <g fill="#ff3333">
+      <rect x="900" y="420" width="12" height="18"/><rect x="900" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="930" y="420" width="12" height="18"/><rect x="930" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="960" y="420" width="12" height="18"/><rect x="960" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="990" y="420" width="12" height="18"/><rect x="990" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="1020" y="420" width="12" height="18"/><rect x="1020" y="410" width="12" height="8" opacity="0.7"/>
+      <rect x="1050" y="420" width="12" height="18"/><rect x="1050" y="410" width="12" height="8" opacity="0.7"/>
+    </g>
+    <!-- Warriors row 2 -->
+    <g fill="#ff3333" opacity="0.7">
+      <rect x="915" y="450" width="12" height="18"/><rect x="915" y="440" width="12" height="8"/>
+      <rect x="945" y="450" width="12" height="18"/><rect x="945" y="440" width="12" height="8"/>
+      <rect x="975" y="450" width="12" height="18"/><rect x="975" y="440" width="12" height="8"/>
+      <rect x="1005" y="450" width="12" height="18"/><rect x="1005" y="440" width="12" height="8"/>
+      <rect x="1035" y="450" width="12" height="18"/><rect x="1035" y="440" width="12" height="8"/>
+    </g>
+    <!-- Enemy hero -->
+    <g fill="#ff3333">
+      <rect x="860" y="395" width="20" height="28"/>
+      <rect x="860" y="381" width="20" height="12"/>
+      <rect x="854" y="385" width="4" height="30" fill="#ff6666" opacity="0.7"/>
+    </g>
+  </g>
+
+  <!-- Battle effects - projectiles -->
+  <g filter="url(#pls2-glow)">
+    <rect x="400" y="430" width="16" height="4" fill="#39FF14" rx="2"/>
+    <rect x="450" y="415" width="16" height="4" fill="#39FF14" rx="2"/>
+    <rect x="500" y="440" width="16" height="4" fill="#39FF14" rx="2"/>
+    <rect x="700" y="425" width="16" height="4" fill="#ff3333" rx="2"/>
+    <rect x="750" y="445" width="16" height="4" fill="#ff3333" rx="2"/>
+  </g>
+
+  <!-- Explosion/impact effect in middle -->
+  <g transform="translate(600, 430)" filter="url(#pls2-glow)">
+    <rect x="-8" y="-8" width="16" height="16" fill="#ffffff" opacity="0.8"/>
+    <rect x="-16" y="-4" width="8" height="8" fill="#39FF14" opacity="0.5"/>
+    <rect x="8" y="-4" width="8" height="8" fill="#39FF14" opacity="0.5"/>
+    <rect x="-4" y="-16" width="8" height="8" fill="#39FF14" opacity="0.5"/>
+    <rect x="-4" y="8" width="8" height="8" fill="#39FF14" opacity="0.5"/>
+  </g>
+
+  <!-- Damage numbers -->
+  <text x="580" y="400" font-family="'Courier New', monospace" font-weight="900" font-size="20" fill="#ff3333" filter="url(#pls2-glow)">-24</text>
+  <text x="650" y="390" font-family="'Courier New', monospace" font-weight="900" font-size="16" fill="#39FF14" filter="url(#pls2-glow)">-18</text>
+
+  <!-- Battle UI -->
+  <!-- Top bar -->
+  <rect x="0" y="0" width="1280" height="50" fill="#0A0A0F" opacity="0.9"/>
+  <text x="640" y="33" text-anchor="middle" font-family="'Courier New', monospace" font-weight="900" font-size="20" fill="#FFFFFF" letter-spacing="2">BATTLE IN PROGRESS</text>
+
+  <!-- Army strength indicators -->
+  <g transform="translate(50, 70)">
+    <rect x="0" y="0" width="200" height="40" rx="6" fill="#0A0A0F" opacity="0.8" stroke="#39FF14" stroke-width="1.5"/>
+    <text x="15" y="16" font-family="'Courier New', monospace" font-size="10" fill="#39FF14">YOUR ARMY</text>
+    <rect x="15" y="22" width="170" height="8" rx="2" fill="#1a2a1a"/>
+    <rect x="15" y="22" width="120" height="8" rx="2" fill="#39FF14" opacity="0.7"/>
+  </g>
+  <g transform="translate(1030, 70)">
+    <rect x="0" y="0" width="200" height="40" rx="6" fill="#0A0A0F" opacity="0.8" stroke="#ff3333" stroke-width="1.5"/>
+    <text x="15" y="16" font-family="'Courier New', monospace" font-size="10" fill="#ff3333">ENEMY ARMY</text>
+    <rect x="15" y="22" width="170" height="8" rx="2" fill="#2a1a1a"/>
+    <rect x="15" y="22" width="100" height="8" rx="2" fill="#ff3333" opacity="0.7"/>
+  </g>
+
+  <!-- Unit count -->
+  <text x="150" y="145" text-anchor="middle" font-family="'Courier New', monospace" font-size="14" fill="#39FF14">Units: 9 / 14</text>
+  <text x="1130" y="145" text-anchor="middle" font-family="'Courier New', monospace" font-size="14" fill="#ff3333">Units: 11 / 18</text>
+
+  <!-- Battle controls bottom -->
+  <rect x="0" y="640" width="1280" height="80" fill="#0A0A0F" opacity="0.9"/>
+  <g transform="translate(300, 655)">
+    <rect x="0" y="0" width="120" height="45" rx="6" fill="#39FF14" opacity="0.2" stroke="#39FF14" stroke-width="1.5"/>
+    <text x="60" y="28" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="13" fill="#39FF14">CHARGE</text>
+  </g>
+  <g transform="translate(450, 655)">
+    <rect x="0" y="0" width="120" height="45" rx="6" fill="#39FF14" opacity="0.2" stroke="#39FF14" stroke-width="1.5"/>
+    <text x="60" y="28" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="13" fill="#39FF14">DEFEND</text>
+  </g>
+  <g transform="translate(600, 655)">
+    <rect x="0" y="0" width="120" height="45" rx="6" fill="#ffaa00" opacity="0.2" stroke="#ffaa00" stroke-width="1.5"/>
+    <text x="60" y="28" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="13" fill="#ffaa00">SPECIAL</text>
+  </g>
+  <g transform="translate(750, 655)">
+    <rect x="0" y="0" width="120" height="45" rx="6" fill="#0A0A0F" stroke="#666" stroke-width="1"/>
+    <text x="60" y="28" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="13" fill="#666">RETREAT</text>
+  </g>
+
+  <!-- Speed control -->
+  <g transform="translate(1050, 660)">
+    <text x="0" y="15" font-family="'Courier New', monospace" font-size="12" fill="#39FF14">SPEED:</text>
+    <rect x="70" y="2" width="30" height="20" rx="3" fill="#39FF14" opacity="0.15" stroke="#39FF14" stroke-width="1"/>
+    <text x="85" y="17" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#39FF14">1x</text>
+    <rect x="108" y="2" width="30" height="20" rx="3" fill="#39FF14" opacity="0.4" stroke="#39FF14" stroke-width="1.5"/>
+    <text x="123" y="17" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="11" fill="#39FF14">2x</text>
+    <rect x="146" y="2" width="30" height="20" rx="3" fill="#39FF14" opacity="0.15" stroke="#39FF14" stroke-width="1"/>
+    <text x="161" y="17" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#39FF14">3x</text>
+  </g>
+
+  <!-- Turn counter -->
+  <g transform="translate(570, 60)">
+    <rect x="0" y="0" width="140" height="35" rx="6" fill="#0A0A0F" opacity="0.8" stroke="#FFFFFF" stroke-width="1"/>
+    <text x="70" y="23" text-anchor="middle" font-family="'Courier New', monospace" font-weight="700" font-size="14" fill="#FFFFFF">TURN 12</text>
+  </g>
+</svg>

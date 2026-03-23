@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="nrs3-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0A0A0F"/>
+      <stop offset="100%" stop-color="#0a0a20"/>
+    </linearGradient>
+    <filter id="nrs3-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="nrs3-strong">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#nrs3-bg)"/>
+
+  <!-- Garage / Car Selection screen -->
+  <!-- Title bar -->
+  <rect x="0" y="0" width="1280" height="70" fill="#0d0d1a" opacity="0.9"/>
+  <text x="640" y="47" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="30" fill="#00F0FF" filter="url(#nrs3-glow)" letter-spacing="4">CHOOSE YOUR RIDE</text>
+
+  <!-- Selected car display area -->
+  <rect x="350" y="100" width="580" height="380" rx="16" fill="#0d0d1a" opacity="0.6" stroke="#00F0FF" stroke-width="2"/>
+
+  <!-- Big abstract car in center -->
+  <g transform="translate(640, 290)" filter="url(#nrs3-strong)">
+    <!-- Car body -->
+    <ellipse cx="0" cy="0" rx="140" ry="45" fill="#00F0FF" opacity="0.15"/>
+    <path d="M-120,20 L-100,-30 L-40,-50 L40,-50 L100,-30 L120,20 L100,40 L-100,40Z" fill="#0A0A0F" stroke="#00F0FF" stroke-width="2.5"/>
+    <!-- Windshield -->
+    <path d="M-40,-45 L-20,-60 L50,-60 L70,-45" fill="none" stroke="#00F0FF" stroke-width="2" opacity="0.6"/>
+    <!-- Wheels -->
+    <ellipse cx="-70" cy="40" rx="25" ry="10" fill="#00F0FF" opacity="0.4"/>
+    <ellipse cx="70" cy="40" rx="25" ry="10" fill="#00F0FF" opacity="0.4"/>
+    <!-- Headlights -->
+    <circle cx="-110" cy="0" r="6" fill="#00F0FF"/>
+    <circle cx="110" cy="0" r="6" fill="#00F0FF"/>
+    <!-- Racing stripe -->
+    <line x1="-80" y1="-10" x2="80" y2="-10" stroke="#00F0FF" stroke-width="3" opacity="0.5"/>
+  </g>
+
+  <!-- Car stats panel -->
+  <g transform="translate(380, 420)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="14" fill="#00F0FF" opacity="0.7">SPEED</text>
+    <rect x="80" y="-12" width="200" height="10" rx="3" fill="#1a1a2e"/>
+    <rect x="80" y="-12" width="170" height="10" rx="3" fill="#00F0FF" opacity="0.7"/>
+
+    <text x="0" y="30" font-family="Arial, sans-serif" font-size="14" fill="#00F0FF" opacity="0.7">ACCEL</text>
+    <rect x="80" y="18" width="200" height="10" rx="3" fill="#1a1a2e"/>
+    <rect x="80" y="18" width="150" height="10" rx="3" fill="#00F0FF" opacity="0.7"/>
+
+    <text x="0" y="60" font-family="Arial, sans-serif" font-size="14" fill="#00F0FF" opacity="0.7">HANDLING</text>
+    <rect x="80" y="48" width="200" height="10" rx="3" fill="#1a1a2e"/>
+    <rect x="80" y="48" width="185" height="10" rx="3" fill="#00F0FF" opacity="0.7"/>
+
+    <text x="0" y="90" font-family="Arial, sans-serif" font-size="14" fill="#00F0FF" opacity="0.7">NITRO</text>
+    <rect x="80" y="78" width="200" height="10" rx="3" fill="#1a1a2e"/>
+    <rect x="80" y="78" width="130" height="10" rx="3" fill="#00F0FF" opacity="0.7"/>
+  </g>
+
+  <!-- Car name -->
+  <text x="640" y="135" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="24" fill="#FFFFFF" letter-spacing="3">PHANTOM X-7</text>
+
+  <!-- Thumbnail car cards on left -->
+  <g transform="translate(40, 120)">
+    <rect x="0" y="0" width="260" height="80" rx="10" fill="#0d0d1a" stroke="#00F0FF" stroke-width="2"/>
+    <rect x="10" y="10" width="60" height="60" rx="6" fill="#00F0FF" opacity="0.2"/>
+    <text x="85" y="35" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#FFFFFF">Phantom X-7</text>
+    <text x="85" y="55" font-family="Arial, sans-serif" font-size="12" fill="#00F0FF" opacity="0.7">CLASS: S+</text>
+  </g>
+  <g transform="translate(40, 220)">
+    <rect x="0" y="0" width="260" height="80" rx="10" fill="#0d0d1a" stroke="#333" stroke-width="1.5"/>
+    <rect x="10" y="10" width="60" height="60" rx="6" fill="#333" opacity="0.3"/>
+    <text x="85" y="35" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#888">Viper GT</text>
+    <text x="85" y="55" font-family="Arial, sans-serif" font-size="12" fill="#555">CLASS: A</text>
+  </g>
+  <g transform="translate(40, 320)">
+    <rect x="0" y="0" width="260" height="80" rx="10" fill="#0d0d1a" stroke="#333" stroke-width="1.5"/>
+    <rect x="10" y="10" width="60" height="60" rx="6" fill="#333" opacity="0.3"/>
+    <text x="85" y="35" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#888">Thunder MK3</text>
+    <text x="85" y="55" font-family="Arial, sans-serif" font-size="12" fill="#555">CLASS: A</text>
+  </g>
+  <g transform="translate(40, 420)">
+    <rect x="0" y="0" width="260" height="80" rx="10" fill="#0d0d1a" stroke="#333" stroke-width="1.5"/>
+    <rect x="10" y="10" width="60" height="60" rx="6" fill="#333" opacity="0.3"/>
+    <text x="85" y="35" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#888">Blitz R8</text>
+    <text x="85" y="55" font-family="Arial, sans-serif" font-size="12" fill="#555">CLASS: B+</text>
+  </g>
+
+  <!-- Right panel - Track info -->
+  <g transform="translate(980, 120)">
+    <rect x="0" y="0" width="260" height="160" rx="10" fill="#0d0d1a" stroke="#00F0FF" stroke-width="1.5" opacity="0.8"/>
+    <text x="20" y="30" font-family="Arial, sans-serif" font-weight="700" font-size="14" fill="#00F0FF">NEXT TRACK</text>
+    <rect x="20" y="45" width="220" height="80" rx="6" fill="#0a1020"/>
+    <text x="130" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#888">Downtown Circuit</text>
+    <text x="130" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#555">5 Laps | Night</text>
+    <text x="20" y="150" font-family="Arial, sans-serif" font-size="12" fill="#00F0FF" opacity="0.7">Best: 03:21.44</text>
+  </g>
+
+  <!-- Bottom action buttons -->
+  <g transform="translate(400, 560)">
+    <rect x="0" y="0" width="200" height="55" rx="10" fill="#0d0d1a" stroke="#00F0FF" stroke-width="2"/>
+    <text x="100" y="35" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="18" fill="#00F0FF">CUSTOMIZE</text>
+  </g>
+  <g transform="translate(680, 560)">
+    <rect x="0" y="0" width="200" height="55" rx="10" fill="#00F0FF"/>
+    <text x="100" y="35" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="18" fill="#0A0A0F">RACE!</text>
+  </g>
+
+  <!-- Bottom nav -->
+  <rect x="0" y="660" width="1280" height="60" fill="#0A0A0F" opacity="0.9"/>
+  <g fill="#00F0FF" opacity="0.5" font-family="Arial, sans-serif" font-size="13">
+    <text x="200" y="695" text-anchor="middle">GARAGE</text>
+    <text x="430" y="695" text-anchor="middle" fill="#00F0FF" opacity="1">CARS</text>
+    <text x="640" y="695" text-anchor="middle">TRACKS</text>
+    <text x="850" y="695" text-anchor="middle">STORE</text>
+    <text x="1080" y="695" text-anchor="middle">PROFILE</text>
+  </g>
+  <rect x="395" y="685" width="70" height="3" rx="1" fill="#00F0FF"/>
+</svg>

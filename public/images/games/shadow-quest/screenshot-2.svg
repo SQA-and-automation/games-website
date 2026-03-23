@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <radialGradient id="sqs2-bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a1030"/>
+      <stop offset="100%" stop-color="#0A0A0F"/>
+    </radialGradient>
+    <radialGradient id="sqs2-boss-aura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff3333" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ff3333" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sqs2-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="sqs2-strong">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="sqs2-red-glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="720" fill="url(#sqs2-bg)"/>
+
+  <!-- Boss arena - circular platform -->
+  <ellipse cx="640" cy="500" rx="450" ry="120" fill="#12101a" stroke="#7B61FF" stroke-width="1" opacity="0.6"/>
+  <!-- Inner ring -->
+  <ellipse cx="640" cy="500" rx="300" ry="80" fill="none" stroke="#7B61FF" stroke-width="1" opacity="0.3"/>
+  <!-- Rune circle -->
+  <ellipse cx="640" cy="500" rx="200" ry="55" fill="none" stroke="#7B61FF" stroke-width="1.5" opacity="0.4" stroke-dasharray="12 6"/>
+
+  <!-- Rune symbols around arena -->
+  <g fill="#7B61FF" opacity="0.25" font-family="Georgia, serif" font-size="30">
+    <text x="350" y="480" transform="rotate(-5 350 480)">&#x2726;</text>
+    <text x="500" y="440" transform="rotate(-3 500 440)">&#x2605;</text>
+    <text x="780" y="440" transform="rotate(3 780 440)">&#x2726;</text>
+    <text x="920" y="480" transform="rotate(5 920 480)">&#x2605;</text>
+    <text x="640" y="430" text-anchor="middle">&#x2736;</text>
+  </g>
+
+  <!-- Boss creature - large shadow demon -->
+  <g transform="translate(750, 280)">
+    <circle cx="0" cy="0" r="180" fill="url(#sqs2-boss-aura)"/>
+    <!-- Body -->
+    <path d="M-60,50 Q-80,-20 -50,-80 Q-20,-120 0,-130 Q20,-120 50,-80 Q80,-20 60,50 Q40,100 0,110 Q-40,100 -60,50Z" fill="#1a0020" stroke="#7B61FF" stroke-width="1.5" opacity="0.8"/>
+    <!-- Horns -->
+    <path d="M-30,-120 Q-50,-170 -60,-180" fill="none" stroke="#ff3333" stroke-width="3" filter="url(#sqs2-red-glow)"/>
+    <path d="M30,-120 Q50,-170 60,-180" fill="none" stroke="#ff3333" stroke-width="3" filter="url(#sqs2-red-glow)"/>
+    <!-- Eyes -->
+    <g filter="url(#sqs2-red-glow)">
+      <ellipse cx="-18" cy="-60" rx="12" ry="6" fill="#ff3333"/>
+      <ellipse cx="18" cy="-60" rx="12" ry="6" fill="#ff3333"/>
+    </g>
+    <!-- Shadow tendrils -->
+    <g stroke="#7B61FF" stroke-width="2" fill="none" opacity="0.3">
+      <path d="M-60,30 Q-120,60 -140,100"/>
+      <path d="M60,30 Q120,60 140,100"/>
+      <path d="M-50,70 Q-100,110 -110,150"/>
+      <path d="M50,70 Q100,110 110,150"/>
+    </g>
+  </g>
+
+  <!-- Boss health bar -->
+  <g transform="translate(340, 80)">
+    <rect x="0" y="0" width="600" height="40" rx="6" fill="#0A0A0F" opacity="0.8" stroke="#ff3333" stroke-width="1.5"/>
+    <rect x="4" y="4" width="350" height="32" rx="4" fill="#cc3333" opacity="0.7"/>
+    <text x="300" y="26" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="16" fill="#FFFFFF">SHADOW LORD MALACHAR</text>
+    <text x="560" y="26" text-anchor="end" font-family="Georgia, serif" font-size="14" fill="#ff9999">58%</text>
+  </g>
+
+  <!-- Player character -->
+  <g transform="translate(380, 380)" filter="url(#sqs2-glow)">
+    <ellipse cx="0" cy="50" rx="25" ry="8" fill="#7B61FF" opacity="0.2"/>
+    <rect x="-12" y="-20" width="24" height="50" rx="3" fill="#2a1545" stroke="#7B61FF" stroke-width="1.5"/>
+    <circle cx="0" cy="-32" r="14" fill="#1a0a30" stroke="#7B61FF" stroke-width="1.5"/>
+    <circle cx="-4" cy="-34" r="2.5" fill="#7B61FF"/>
+    <circle cx="4" cy="-34" r="2.5" fill="#7B61FF"/>
+    <!-- Casting spell -->
+    <circle cx="30" cy="-10" r="15" fill="#7B61FF" opacity="0.3" filter="url(#sqs2-strong)"/>
+    <circle cx="30" cy="-10" r="8" fill="#c4a0ff" opacity="0.5"/>
+  </g>
+
+  <!-- Magic beam from player to boss -->
+  <g filter="url(#sqs2-strong)" opacity="0.6">
+    <line x1="410" y1="370" x2="700" y2="300" stroke="#7B61FF" stroke-width="4"/>
+    <line x1="410" y1="370" x2="700" y2="300" stroke="#c4a0ff" stroke-width="2"/>
+  </g>
+
+  <!-- Damage numbers -->
+  <g filter="url(#sqs2-glow)">
+    <text x="720" y="240" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="36" fill="#ff6666">-347</text>
+    <text x="680" y="200" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="24" fill="#c4a0ff" opacity="0.7">CRITICAL!</text>
+  </g>
+
+  <!-- Player HUD -->
+  <g transform="translate(40, 600)">
+    <!-- Health -->
+    <text x="0" y="0" font-family="Georgia, serif" font-size="12" fill="#ff6666">HP</text>
+    <rect x="25" y="-10" width="200" height="12" rx="3" fill="#1a1a2e" stroke="#7B61FF" stroke-width="0.5"/>
+    <rect x="27" y="-8" width="130" height="8" rx="2" fill="#cc3333" opacity="0.8"/>
+    <!-- Mana -->
+    <text x="0" y="22" font-family="Georgia, serif" font-size="12" fill="#7B61FF">MP</text>
+    <rect x="25" y="12" width="200" height="12" rx="3" fill="#1a1a2e" stroke="#7B61FF" stroke-width="0.5"/>
+    <rect x="27" y="14" width="90" height="8" rx="2" fill="#7B61FF" opacity="0.8"/>
+  </g>
+
+  <!-- Party member indicators -->
+  <g transform="translate(40, 650)">
+    <circle cx="15" cy="15" r="12" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1.5"/>
+    <text x="15" y="19" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#7B61FF">M</text>
+    <circle cx="50" cy="15" r="12" fill="#1a1a2e" stroke="#39FF14" stroke-width="1.5"/>
+    <text x="50" y="19" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#39FF14">W</text>
+    <circle cx="85" cy="15" r="12" fill="#1a1a2e" stroke="#ff6666" stroke-width="1.5"/>
+    <text x="85" y="19" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#ff6666">T</text>
+  </g>
+
+  <!-- Ability bar -->
+  <g transform="translate(490, 660)">
+    <rect x="0" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#7B61FF" stroke-width="2"/>
+    <text x="25" y="30" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#7B61FF">&#x2726;</text>
+    <rect x="65" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1.5"/>
+    <text x="90" y="30" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#7B61FF">&#x2605;</text>
+    <rect x="130" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#7B61FF" stroke-width="1.5"/>
+    <text x="155" y="30" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#7B61FF">&#x2736;</text>
+    <rect x="195" y="0" width="50" height="50" rx="6" fill="#1a1a2e" stroke="#ff3333" stroke-width="2"/>
+    <text x="220" y="30" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#ff3333">&#x2620;</text>
+    <!-- Cooldown overlay -->
+    <rect x="130" y="0" width="50" height="30" rx="6" fill="#0A0A0F" opacity="0.6"/>
+    <text x="155" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#FFFFFF">3s</text>
+  </g>
+
+  <!-- Phase indicator -->
+  <g transform="translate(1080, 80)">
+    <rect x="0" y="0" width="160" height="40" rx="6" fill="#0A0A0F" opacity="0.8" stroke="#ff3333" stroke-width="1.5"/>
+    <text x="80" y="26" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="16" fill="#ff3333">PHASE 2 / 3</text>
+  </g>
+</svg>

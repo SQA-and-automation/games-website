@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="nrs1-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0A0A0F"/>
+      <stop offset="60%" stop-color="#0a1525"/>
+      <stop offset="100%" stop-color="#0a2040"/>
+    </linearGradient>
+    <linearGradient id="nrs1-road" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0A0A0F"/>
+    </linearGradient>
+    <linearGradient id="nrs1-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#00F0FF" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#00F0FF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="nrs1-neon">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="nrs1-strong">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1280" height="720" fill="url(#nrs1-sky)"/>
+
+  <!-- City skyline silhouette -->
+  <g fill="#0d1520" opacity="0.9">
+    <rect x="80" y="180" width="60" height="220"/>
+    <rect x="150" y="140" width="80" height="260"/>
+    <rect x="240" y="200" width="50" height="200"/>
+    <rect x="300" y="120" width="70" height="280"/>
+    <rect x="380" y="170" width="90" height="230"/>
+    <rect x="500" y="100" width="60" height="300"/>
+    <rect x="570" y="160" width="100" height="240"/>
+    <rect x="700" y="130" width="70" height="270"/>
+    <rect x="780" y="180" width="90" height="220"/>
+    <rect x="900" y="110" width="80" height="290"/>
+    <rect x="990" y="160" width="60" height="240"/>
+    <rect x="1060" y="140" width="100" height="260"/>
+    <rect x="1170" y="190" width="70" height="210"/>
+  </g>
+
+  <!-- Building windows (dots of light) -->
+  <g fill="#00F0FF" opacity="0.3">
+    <rect x="160" y="160" width="6" height="8"/><rect x="175" y="160" width="6" height="8"/>
+    <rect x="160" y="180" width="6" height="8"/><rect x="175" y="180" width="6" height="8"/>
+    <rect x="160" y="200" width="6" height="8"/><rect x="175" y="200" width="6" height="8"/>
+    <rect x="310" y="140" width="6" height="8"/><rect x="325" y="140" width="6" height="8"/><rect x="340" y="140" width="6" height="8"/>
+    <rect x="310" y="160" width="6" height="8"/><rect x="340" y="160" width="6" height="8"/>
+    <rect x="510" y="120" width="6" height="8"/><rect x="525" y="120" width="6" height="8"/>
+    <rect x="510" y="140" width="6" height="8"/><rect x="525" y="140" width="6" height="8"/>
+    <rect x="910" y="130" width="6" height="8"/><rect x="925" y="130" width="6" height="8"/><rect x="940" y="130" width="6" height="8"/>
+    <rect x="910" y="150" width="6" height="8"/><rect x="940" y="150" width="6" height="8"/>
+    <rect x="1070" y="160" width="6" height="8"/><rect x="1085" y="160" width="6" height="8"/><rect x="1100" y="160" width="6" height="8"/>
+  </g>
+
+  <!-- Road surface -->
+  <polygon points="0,720 1280,720 900,400 380,400" fill="url(#nrs1-road)"/>
+
+  <!-- Road perspective lines -->
+  <g stroke="#00F0FF" stroke-width="2" opacity="0.4">
+    <line x1="0" y1="720" x2="380" y2="400"/>
+    <line x1="1280" y1="720" x2="900" y2="400"/>
+  </g>
+
+  <!-- Lane markings -->
+  <g stroke="#00F0FF" stroke-width="2" opacity="0.3" stroke-dasharray="30 20">
+    <line x1="430" y1="720" x2="560" y2="400"/>
+    <line x1="850" y1="720" x2="720" y2="400"/>
+  </g>
+
+  <!-- Center lane glow -->
+  <line x1="640" y1="720" x2="640" y2="400" stroke="#00F0FF" stroke-width="3" opacity="0.5" stroke-dasharray="40 25" filter="url(#nrs1-neon)"/>
+
+  <!-- Horizontal road lines (perspective) -->
+  <g stroke="#00F0FF" stroke-width="1" opacity="0.15">
+    <line x1="200" y1="600" x2="1080" y2="600"/>
+    <line x1="300" y1="520" x2="980" y2="520"/>
+    <line x1="350" y1="460" x2="930" y2="460"/>
+    <line x1="370" y1="430" x2="910" y2="430"/>
+  </g>
+
+  <!-- Player car (abstract) -->
+  <g transform="translate(580, 560)" filter="url(#nrs1-strong)">
+    <polygon points="60,-50 80,-20 80,30 40,30 40,-20" fill="#00F0FF" opacity="0.8"/>
+    <polygon points="60,-50 40,-20 40,30 80,30 80,-20" fill="#00c0cc" opacity="0.6"/>
+    <!-- Tail lights -->
+    <rect x="40" y="25" width="15" height="6" fill="#00F0FF" rx="2"/>
+    <rect x="65" y="25" width="15" height="6" fill="#00F0FF" rx="2"/>
+  </g>
+
+  <!-- Speed lines -->
+  <g stroke="#00F0FF" stroke-width="2" opacity="0.4" stroke-linecap="round">
+    <line x1="200" y1="500" x2="100" y2="600"/>
+    <line x1="250" y1="480" x2="150" y2="580"/>
+    <line x1="1080" y1="500" x2="1180" y2="600"/>
+    <line x1="1030" y1="480" x2="1130" y2="580"/>
+  </g>
+
+  <!-- HUD - Speed -->
+  <g transform="translate(1050, 620)">
+    <rect x="0" y="0" width="180" height="60" rx="8" fill="#0A0A0F" opacity="0.7" stroke="#00F0FF" stroke-width="1.5"/>
+    <text x="20" y="25" font-family="Arial, sans-serif" font-size="12" fill="#00F0FF" opacity="0.7">SPEED</text>
+    <text x="20" y="50" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="24" fill="#00F0FF">287 km/h</text>
+  </g>
+
+  <!-- HUD - Position -->
+  <g transform="translate(50, 30)">
+    <rect x="0" y="0" width="120" height="50" rx="8" fill="#0A0A0F" opacity="0.7" stroke="#00F0FF" stroke-width="1.5"/>
+    <text x="15" y="22" font-family="Arial, sans-serif" font-size="11" fill="#00F0FF" opacity="0.7">POSITION</text>
+    <text x="15" y="42" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="22" fill="#FFFFFF">1st / 8</text>
+  </g>
+
+  <!-- HUD - Lap -->
+  <g transform="translate(200, 30)">
+    <rect x="0" y="0" width="100" height="50" rx="8" fill="#0A0A0F" opacity="0.7" stroke="#00F0FF" stroke-width="1.5"/>
+    <text x="15" y="22" font-family="Arial, sans-serif" font-size="11" fill="#00F0FF" opacity="0.7">LAP</text>
+    <text x="15" y="42" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="22" fill="#FFFFFF">3 / 5</text>
+  </g>
+
+  <!-- HUD - Minimap -->
+  <g transform="translate(1100, 30)">
+    <rect x="0" y="0" width="140" height="100" rx="8" fill="#0A0A0F" opacity="0.7" stroke="#00F0FF" stroke-width="1.5"/>
+    <path d="M20,50 Q40,20 70,20 Q100,20 100,50 Q100,80 70,80 Q40,80 20,50Z" fill="none" stroke="#00F0FF" stroke-width="1.5" opacity="0.5"/>
+    <circle cx="30" cy="50" r="4" fill="#00F0FF"/>
+    <circle cx="60" cy="25" r="3" fill="#ff4444" opacity="0.6"/>
+    <circle cx="90" cy="45" r="3" fill="#ff4444" opacity="0.6"/>
+  </g>
+
+  <!-- Nitro bar -->
+  <g transform="translate(50, 620)">
+    <rect x="0" y="0" width="200" height="16" rx="4" fill="#0A0A0F" opacity="0.7" stroke="#00F0FF" stroke-width="1"/>
+    <rect x="2" y="2" width="140" height="12" rx="3" fill="#00F0FF" opacity="0.7"/>
+    <text x="210" y="13" font-family="Arial, sans-serif" font-size="11" fill="#00F0FF">NITRO</text>
+  </g>
+</svg>
