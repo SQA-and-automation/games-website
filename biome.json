@@ -23,15 +23,13 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"security": {
+				"noDangerouslySetInnerHtml": "off"
+			}
 		}
 	},
 	"files": {
-		"includes": [
-			"src/**",
-			"__tests__/**",
-			"*.ts",
-			"*.json"
-		]
+		"includes": ["src/**", "__tests__/**", "*.ts", "*.json"]
 	}
 }

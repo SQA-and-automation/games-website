@@ -2,10 +2,9 @@
 
 import dynamic from "next/dynamic";
 
-const FlowFieldBackground = dynamic(
-	() => import("@/components/effects/FlowFieldBackground"),
-	{ ssr: false },
-);
+const FlowFieldBackground = dynamic(() => import("@/components/effects/FlowFieldBackground"), {
+	ssr: false,
+});
 
 export default function FlowFieldWrapper() {
 	return <FlowFieldBackground />;

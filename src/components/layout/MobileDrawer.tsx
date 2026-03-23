@@ -1,10 +1,10 @@
 "use client";
 
+import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import CloseIcon from "@mui/icons-material/Close";
 
 interface MobileDrawerProps {
 	open: boolean;
@@ -13,12 +13,7 @@ interface MobileDrawerProps {
 	onNavClick: (href: string) => void;
 }
 
-export default function MobileDrawer({
-	open,
-	onClose,
-	navLinks,
-	onNavClick,
-}: MobileDrawerProps) {
+export default function MobileDrawer({ open, onClose, navLinks, onNavClick }: MobileDrawerProps) {
 	return (
 		<Drawer
 			anchor="right"
@@ -36,7 +31,11 @@ export default function MobileDrawer({
 		>
 			<Box sx={{ p: 3 }}>
 				<Box sx={{ display: "flex", justifyContent: "flex-end", mb: 4 }}>
-					<IconButton onClick={onClose} aria-label="Close navigation menu" sx={{ color: "text.primary" }}>
+					<IconButton
+						onClick={onClose}
+						aria-label="Close navigation menu"
+						sx={{ color: "text.primary" }}
+					>
 						<CloseIcon />
 					</IconButton>
 				</Box>

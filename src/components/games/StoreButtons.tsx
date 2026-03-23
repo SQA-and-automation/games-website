@@ -1,7 +1,7 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import AppleIcon from "@mui/icons-material/Apple";
 import ShopIcon from "@mui/icons-material/Shop";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import type { GameLinks } from "@/types/game";
 
 interface StoreButtonsProps {

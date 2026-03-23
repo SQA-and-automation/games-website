@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import { useRef, useState } from "react";
 import type { GameScreenshot } from "@/types/game";
 
 interface ScreenshotCarouselProps {
@@ -12,10 +12,7 @@ interface ScreenshotCarouselProps {
 	accentColor: string;
 }
 
-export default function ScreenshotCarousel({
-	screenshots,
-	accentColor,
-}: ScreenshotCarouselProps) {
+export default function ScreenshotCarousel({ screenshots, accentColor }: ScreenshotCarouselProps) {
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const [activeIndex, setActiveIndex] = useState(0);
 
@@ -68,9 +65,7 @@ export default function ScreenshotCarousel({
 							flexShrink: 0,
 							borderRadius: 2,
 							overflow: "hidden",
-							border: i === activeIndex
-								? `2px solid ${accentColor}60`
-								: "2px solid transparent",
+							border: i === activeIndex ? `2px solid ${accentColor}60` : "2px solid transparent",
 							transition: "border-color 0.3s ease",
 						}}
 					>

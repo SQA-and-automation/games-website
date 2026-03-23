@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import { useServerInsertedHTML } from "next/navigation";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { theme } from "@/theme/theme";
 
 export default function ThemeRegistry({ children }: { children: ReactNode }) {

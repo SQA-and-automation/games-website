@@ -81,10 +81,10 @@ export default function AboutSection() {
 					}}
 				>
 					<Typography variant="body1" sx={{ color: "text.secondary", textAlign: "center", mb: 4 }}>
-						ELLIXMMER is an independent game studio dedicated to crafting bold, unforgettable
-						mobile experiences. We believe games should be more than entertainment — they should
-						be adventures that stay with you. From high-speed racers to epic RPGs, every game
-						we create pushes the boundaries of what&apos;s possible on mobile.
+						ELLIXMMER is an independent game studio dedicated to crafting bold, unforgettable mobile
+						experiences. We believe games should be more than entertainment — they should be
+						adventures that stay with you. From high-speed racers to epic RPGs, every game we create
+						pushes the boundaries of what&apos;s possible on mobile.
 					</Typography>
 
 					<Box

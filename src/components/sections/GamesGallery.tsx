@@ -7,8 +7,8 @@ import SectionWrapper from "@/components/common/SectionWrapper";
 import GlowText from "@/components/effects/GlowText";
 import GameCard from "@/components/games/GameCard";
 import GameModal from "@/components/games/GameModal";
-import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { games } from "@/data/games";
+import { fadeInUp, staggerContainer } from "@/lib/animations";
 import type { Game } from "@/types/game";
 
 const MotionBox = motion.create(Box);
@@ -54,20 +54,13 @@ export default function GamesGallery() {
 								},
 							}}
 						>
-							<GameCard
-								game={game}
-								onClick={() => setSelectedGame(game)}
-							/>
+							<GameCard game={game} onClick={() => setSelectedGame(game)} />
 						</MotionBox>
 					))}
 				</Box>
 			</MotionBox>
 
-			<GameModal
-				game={selectedGame}
-				open={!!selectedGame}
-				onClose={() => setSelectedGame(null)}
-			/>
+			<GameModal game={selectedGame} open={!!selectedGame} onClose={() => setSelectedGame(null)} />
 		</SectionWrapper>
 	);
 }

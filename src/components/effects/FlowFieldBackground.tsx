@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
+import { useEffect, useRef } from "react";
 
 interface Particle {
 	x: number;
@@ -18,10 +18,10 @@ interface Particle {
 }
 
 const NEON_COLORS = [
-	"0, 240, 255",   // cyan
-	"123, 97, 255",  // purple
-	"255, 0, 229",   // magenta
-	"57, 255, 20",   // lime
+	"0, 240, 255", // cyan
+	"123, 97, 255", // purple
+	"255, 0, 229", // magenta
+	"57, 255, 20", // lime
 ];
 
 function noise2D(x: number, y: number): number {
@@ -74,9 +74,7 @@ export default function FlowFieldBackground() {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
 
-		const prefersReducedMotion = window.matchMedia(
-			"(prefers-reduced-motion: reduce)",
-		).matches;
+		const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 		if (prefersReducedMotion) return;
 
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -168,13 +166,7 @@ export default function FlowFieldBackground() {
 
 				// Aging
 				p.life++;
-				if (
-					p.life > p.maxLife ||
-					p.x < -50 ||
-					p.x > width + 50 ||
-					p.y < -50 ||
-					p.y > height + 50
-				) {
+				if (p.life > p.maxLife || p.x < -50 || p.x > width + 50 || p.y < -50 || p.y > height + 50) {
 					Object.assign(p, createParticle());
 				}
 			}

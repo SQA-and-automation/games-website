@@ -123,8 +123,7 @@ export const theme = createTheme({
 					background: "linear-gradient(135deg, #00F0FF 0%, #7B61FF 100%)",
 					boxShadow: "0 0 20px rgba(0, 240, 255, 0.3)",
 					"&:hover": {
-						boxShadow:
-							"0 0 30px rgba(0, 240, 255, 0.5), 0 0 60px rgba(0, 240, 255, 0.2)",
+						boxShadow: "0 0 30px rgba(0, 240, 255, 0.5), 0 0 60px rgba(0, 240, 255, 0.2)",
 						transform: "translateY(-2px)",
 					},
 				},

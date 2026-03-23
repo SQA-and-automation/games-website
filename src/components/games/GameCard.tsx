@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useRef } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import { motion } from "framer-motion";
+import { useCallback, useRef } from "react";
 import type { Game } from "@/types/game";
 
 const MotionCard = motion.create(Card);
@@ -19,22 +19,19 @@ interface GameCardProps {
 export default function GameCard({ game, onClick }: GameCardProps) {
 	const cardRef = useRef<HTMLDivElement>(null);
 
-	const handleMouseMove = useCallback(
-		(e: React.MouseEvent<HTMLDivElement>) => {
-			const card = cardRef.current;
-			if (!card) return;
-			const rect = card.getBoundingClientRect();
-			const x = ((e.clientX - rect.left) / rect.width) * 100;
-			const y = ((e.clientY - rect.top) / rect.height) * 100;
-			card.style.setProperty("--mouse-x", `${x}%`);
-			card.style.setProperty("--mouse-y", `${y}%`);
+	const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+		const card = cardRef.current;
+		if (!card) return;
+		const rect = card.getBoundingClientRect();
+		const x = ((e.clientX - rect.left) / rect.width) * 100;
+		const y = ((e.clientY - rect.top) / rect.height) * 100;
+		card.style.setProperty("--mouse-x", `${x}%`);
+		card.style.setProperty("--mouse-y", `${y}%`);
 
-			const rotateX = ((y - 50) / 50) * -5;
-			const rotateY = ((x - 50) / 50) * 5;
-			card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
-		},
-		[],
-	);
+		const rotateX = ((y - 50) / 50) * -5;
+		const rotateY = ((x - 50) / 50) * 5;
+		card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+	}, []);
 
 	const handleMouseLeave = useCallback(() => {
 		const card = cardRef.current;
@@ -45,7 +42,16 @@ export default function GameCard({ game, onClick }: GameCardProps) {
 	return (
 		<MotionCard
 			ref={cardRef}
+			role="button"
+			tabIndex={0}
+			aria-label={`View details for ${game.name}`}
 			onClick={onClick}
+			onKeyDown={(e: React.KeyboardEvent) => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					onClick();
+				}
+			}}
 			onMouseMove={handleMouseMove}
 			onMouseLeave={handleMouseLeave}
 			layoutId={`game-card-${game.id}`}

@@ -1,19 +1,19 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
+import StarIcon from "@mui/icons-material/Star";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
-import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
-import StarIcon from "@mui/icons-material/Star";
 import { AnimatePresence, motion } from "framer-motion";
-import ScreenshotCarousel from "./ScreenshotCarousel";
-import StoreButtons from "./StoreButtons";
+import { useCallback, useEffect } from "react";
 import { modalContent, modalOverlay } from "@/lib/animations";
 import type { Game } from "@/types/game";
+import ScreenshotCarousel from "./ScreenshotCarousel";
+import StoreButtons from "./StoreButtons";
 
 const MotionBox = motion.create(Box);
 
@@ -152,10 +152,7 @@ export default function GameModal({ game, open, onClose }: GameModalProps) {
 						{/* Content */}
 						<Box sx={{ p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 3 }}>
 							{/* Screenshots */}
-							<ScreenshotCarousel
-								screenshots={game.screenshots}
-								accentColor={game.accentColor}
-							/>
+							<ScreenshotCarousel screenshots={game.screenshots} accentColor={game.accentColor} />
 
 							{/* Stats row */}
 							<Box
@@ -173,7 +170,9 @@ export default function GameModal({ game, open, onClose }: GameModalProps) {
 										readOnly
 										size="small"
 										icon={<StarIcon sx={{ color: game.accentColor }} fontSize="inherit" />}
-										emptyIcon={<StarIcon sx={{ color: "rgba(255,255,255,0.15)" }} fontSize="inherit" />}
+										emptyIcon={
+											<StarIcon sx={{ color: "rgba(255,255,255,0.15)" }} fontSize="inherit" />
+										}
 									/>
 									<Typography variant="body2" sx={{ color: game.accentColor, fontWeight: 700 }}>
 										{game.rating}

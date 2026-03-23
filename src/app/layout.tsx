@@ -19,8 +19,7 @@ const exo2 = Exo_2({
 
 export const metadata: Metadata = {
 	title: "ELLIXMMER | Mobile Game Publisher",
-	description:
-		"Crafting bold mobile adventures for Android & iOS. Explore our games portfolio.",
+	description: "Crafting bold mobile adventures for Android & iOS. Explore our games portfolio.",
 	keywords: ["mobile games", "game publisher", "android", "ios", "ELLIXMMER"],
 	openGraph: {
 		title: "ELLIXMMER | Mobile Game Publisher",
@@ -29,11 +28,7 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function RootLayout({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en" className={`${orbitron.variable} ${exo2.variable}`}>
 			<body>

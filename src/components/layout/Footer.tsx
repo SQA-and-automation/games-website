@@ -1,10 +1,10 @@
+import InstagramIcon from "@mui/icons-material/Instagram";
+import XIcon from "@mui/icons-material/X";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import XIcon from "@mui/icons-material/X";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import YouTubeIcon from "@mui/icons-material/YouTube";
 
 const socialLinks = [
 	{ icon: <XIcon />, label: "X (Twitter)", href: "#" },
@@ -26,7 +26,8 @@ export default function Footer() {
 					left: "10%",
 					right: "10%",
 					height: "1px",
-					background: "linear-gradient(90deg, transparent, #00F0FF40, #7B61FF40, #FF00E540, transparent)",
+					background:
+						"linear-gradient(90deg, transparent, #00F0FF40, #7B61FF40, #FF00E540, transparent)",
 				},
 			}}
 		>

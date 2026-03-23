@@ -54,11 +54,7 @@ export default function HeroSection() {
 				}}
 			>
 				<MotionBox variants={heroItem}>
-					<GlowText
-						variant="h1"
-						glowColor="#00F0FF"
-						intensity="high"
-					>
+					<GlowText variant="h1" glowColor="#00F0FF" intensity="high">
 						ELLIXMMER
 					</GlowText>
 				</MotionBox>
@@ -79,16 +75,11 @@ export default function HeroSection() {
 				</MotionBox>
 
 				<MotionBox variants={heroItem} sx={{ mt: 2 }}>
-					<NeonButton onClick={handleExplore}>
-						Explore Our Games
-					</NeonButton>
+					<NeonButton onClick={handleExplore}>Explore Our Games</NeonButton>
 				</MotionBox>
 
 				{/* Scroll indicator */}
-				<MotionBox
-					variants={heroItem}
-					sx={{ mt: 6 }}
-				>
+				<MotionBox variants={heroItem} sx={{ mt: 6 }}>
 					<Box
 						sx={{
 							width: 24,

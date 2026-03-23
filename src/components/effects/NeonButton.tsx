@@ -1,8 +1,8 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import type { ButtonProps } from "@mui/material/Button";
+import Button from "@mui/material/Button";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 

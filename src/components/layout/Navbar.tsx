@@ -1,14 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
+import { useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import { useCallback, useEffect, useState } from "react";
 import MobileDrawer from "./MobileDrawer";
 
 const navLinks = [
@@ -41,18 +41,22 @@ export default function Navbar() {
 			<AppBar
 				position="fixed"
 				sx={{
-					background: scrolled
-						? "rgba(10, 10, 15, 0.85)"
-						: "rgba(10, 10, 15, 0.4)",
+					background: scrolled ? "rgba(10, 10, 15, 0.85)" : "rgba(10, 10, 15, 0.4)",
 					backdropFilter: "blur(12px)",
-					borderBottom: scrolled
-						? "1px solid rgba(0, 240, 255, 0.12)"
-						: "1px solid transparent",
+					borderBottom: scrolled ? "1px solid rgba(0, 240, 255, 0.12)" : "1px solid transparent",
 					transition: "all 0.3s ease",
 					zIndex: theme.zIndex.appBar,
 				}}
 			>
-				<Toolbar sx={{ justifyContent: "space-between", maxWidth: "lg", mx: "auto", width: "100%", px: { xs: 2, md: 4 } }}>
+				<Toolbar
+					sx={{
+						justifyContent: "space-between",
+						maxWidth: "lg",
+						mx: "auto",
+						width: "100%",
+						px: { xs: 2, md: 4 },
+					}}
+				>
 					<Typography
 						variant="h6"
 						sx={{

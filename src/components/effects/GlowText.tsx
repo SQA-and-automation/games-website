@@ -1,5 +1,5 @@
-import Typography from "@mui/material/Typography";
 import type { TypographyProps } from "@mui/material/Typography";
+import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
 interface GlowTextProps extends Omit<TypographyProps, "children"> {
@@ -9,10 +9,8 @@ interface GlowTextProps extends Omit<TypographyProps, "children"> {
 }
 
 const glowIntensities = {
-	low: (color: string) =>
-		`0 0 7px ${color}, 0 0 10px ${color}`,
-	medium: (color: string) =>
-		`0 0 7px ${color}, 0 0 10px ${color}, 0 0 21px ${color}`,
+	low: (color: string) => `0 0 7px ${color}, 0 0 10px ${color}`,
+	medium: (color: string) => `0 0 7px ${color}, 0 0 10px ${color}, 0 0 21px ${color}`,
 	high: (color: string) =>
 		`0 0 7px ${color}, 0 0 10px ${color}, 0 0 21px ${color}, 0 0 42px ${color}`,
 };
