@@ -559,14 +559,14 @@ export class Game {
 		const { zone } = this.road.getZone(segIndex);
 
 		// Project road
-		this.road.project(this.position, this.playerX, 1000, 1 / Math.tan((80 * Math.PI) / 360));
+		this.road.project(this.position, this.playerX);
 
 		// Sky
 		this.roadRenderer.drawSky(zone);
 		this.roadRenderer.drawHorizonGlow(zone, this.time);
 
 		// Road
-		this.roadRenderer.drawRoad(this.road, this.position, this.playerX);
+		this.roadRenderer.drawRoad(this.road, this.position);
 
 		// Traffic, coins, power-ups (drawn on road segments)
 		this.drawItems(segIndex);

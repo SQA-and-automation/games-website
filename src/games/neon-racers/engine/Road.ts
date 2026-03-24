@@ -1,22 +1,20 @@
 import { ROAD, SCREEN, ZONES } from "../config";
-import type { RoadSegment, ScreenPoint } from "../types";
+import type { RoadSegment } from "../types";
 
 /**
- * Pseudo-3D road: array of segments, each projected to screen coordinates.
- * Curves are encoded as cumulative horizontal offsets.
+ * Pseudo-3D road using classic scanline projection (OutRun style).
+ * Each segment represents a horizontal strip of road at a certain Z distance.
  */
 export class Road {
 	segments: RoadSegment[] = [];
-	private totalLength = 0;
 
 	constructor() {
 		this.generate();
 	}
 
 	private generate() {
-		// Generate enough segments for all zones + repeats
 		const totalZoneLength = ZONES.reduce((sum, z) => sum + z.length, 0);
-		const totalSegments = totalZoneLength * 3; // enough for multiple cycles
+		const totalSegments = totalZoneLength * 3;
 
 		for (let i = 0; i < totalSegments; i++) {
 			this.segments.push({
@@ -28,22 +26,19 @@ export class Road {
 				clip: 0,
 			});
 		}
-
-		this.totalLength = this.segments.length * ROAD.SEGMENT_LENGTH;
 	}
 
 	private generateCurve(index: number): number {
-		// Procedural curves: sine waves of varying frequency
-		const t = index * 0.01;
-		return Math.sin(t * 1.3) * 2.5 + Math.sin(t * 0.7) * 1.5 + Math.sin(t * 3.1) * 0.8;
+		const t = index * 0.008;
+		return Math.sin(t * 1.3) * 3 + Math.sin(t * 0.7) * 2 + Math.sin(t * 3.1) * 1;
 	}
 
 	getZone(segmentIndex: number) {
-		let accumulated = 0;
 		const cycleLength = ZONES.reduce((sum, z) => sum + z.length, 0);
-		const posInCycle = segmentIndex % cycleLength;
+		const posInCycle = ((segmentIndex % cycleLength) + cycleLength) % cycleLength;
 		const cycleNum = Math.floor(segmentIndex / cycleLength);
 
+		let accumulated = 0;
 		for (const zone of ZONES) {
 			if (posInCycle < accumulated + zone.length) {
 				return { zone, cycleNum };
@@ -63,52 +58,56 @@ export class Road {
 	}
 
 	/**
-	 * Project segments to screen coordinates for rendering.
+	 * Project road segments to screen coordinates.
+	 * Classic pseudo-3D: each segment gets a screen Y, X, and width based on perspective.
 	 */
-	project(
-		position: number, // player position in segments (float)
-		playerX: number, // player X offset (-1 to 1)
-		cameraHeight: number,
-		cameraDepth: number,
-	) {
+	project(position: number, playerX: number) {
 		const baseIndex = Math.max(0, Math.floor(position));
-		const cameraY = cameraHeight;
-		let x = 0;
-		let dx = 0;
-		let maxY: number = SCREEN.HEIGHT;
+		const camHeight = 1500;
+		const fov = 100;
+		const cameraDepth = 1 / Math.tan(((fov / 2) * Math.PI) / 180);
 
-		for (let n = 0; n < ROAD.VISIBLE_SEGMENTS; n++) {
+		let curveAccum = 0;
+		let prevScreenY: number = SCREEN.HEIGHT;
+
+		for (let n = 1; n <= ROAD.VISIBLE_SEGMENTS; n++) {
 			const segIndex = (baseIndex + n) % this.segments.length;
 			const seg = this.segments[segIndex];
+			if (!seg) continue;
 
-			// Projection
-			const camZ = (n - (position % 1)) * ROAD.SEGMENT_LENGTH;
-			if (camZ <= 0) continue;
+			// Z distance from camera (in segment units)
+			const z = (n - (position - baseIndex)) * ROAD.SEGMENT_LENGTH;
+			if (z <= 0) continue;
 
-			const scale = cameraDepth / camZ;
-			const projX =
-				SCREEN.WIDTH / 2 + scale * (x - (playerX * ROAD.WIDTH) / 2) * (SCREEN.WIDTH / 2);
-			const projY = SCREEN.HEIGHT / 2 - scale * cameraY * (SCREEN.HEIGHT / 2);
-			const projW = scale * ROAD.WIDTH * (SCREEN.WIDTH / 2);
+			// Perspective projection
+			const scale = cameraDepth / z;
 
-			seg.p2 = { x: projX, y: projY, w: projW };
-			seg.clip = maxY;
+			// Screen Y: above center = further away
+			const screenY = SCREEN.HEIGHT * 0.6 - scale * camHeight * SCREEN.HEIGHT;
 
-			if (n > 0) {
-				const prevSeg = this.segments[(baseIndex + n - 1) % this.segments.length];
-				seg.p1 = { ...prevSeg.p2 };
-			} else {
-				seg.p1 = { x: projX, y: SCREEN.HEIGHT, w: projW * 1.2 };
+			// Road width at this distance
+			const screenW = scale * ROAD.WIDTH * SCREEN.WIDTH * 0.5;
+
+			// Horizontal offset from curves
+			curveAccum += seg.curve * scale * 2;
+			const screenX = SCREEN.WIDTH / 2 - playerX * screenW * 0.5 + curveAccum;
+
+			seg.p2 = { x: screenX, y: screenY, w: screenW };
+
+			// p1 = previous segment's p2 (or screen bottom for first segment)
+			if (n === 1) {
+				seg.p1 = { x: SCREEN.WIDTH / 2, y: SCREEN.HEIGHT, w: screenW * 2.5 };
 			}
 
-			// Accumulate curve
-			dx += seg.curve * ROAD.CURVE_EASE;
-			x += dx;
-
-			// Update clip (only draw above previous segment)
-			if (projY < maxY) {
-				maxY = projY;
+			// Set p1 of next iteration
+			const nextSegIndex = (baseIndex + n + 1) % this.segments.length;
+			const nextSeg = this.segments[nextSegIndex];
+			if (nextSeg) {
+				nextSeg.p1 = { x: screenX, y: screenY, w: screenW };
 			}
+
+			seg.clip = prevScreenY;
+			prevScreenY = Math.min(prevScreenY, screenY);
 		}
 	}
 }

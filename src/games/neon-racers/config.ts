@@ -5,12 +5,10 @@ export const SCREEN = {
 
 export const ROAD = {
 	LANES: 3,
-	WIDTH: 2200, // road width in world units
+	WIDTH: 2000, // road width in world units
 	SEGMENT_LENGTH: 200,
-	VISIBLE_SEGMENTS: 150,
+	VISIBLE_SEGMENTS: 80,
 	RUMBLE_LENGTH: 3, // segments per rumble strip
-	DRAW_DISTANCE: 300,
-	CURVE_EASE: 0.5,
 } as const;
 
 export const PLAYER_CFG = {
