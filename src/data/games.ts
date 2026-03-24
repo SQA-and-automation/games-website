@@ -94,5 +94,6 @@ export const games: Game[] = [
 		releaseYear: 2026,
 		accentColor: "#FF00E5",
 		featured: true,
+		playable: true,
 	},
 ];

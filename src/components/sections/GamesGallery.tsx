@@ -2,6 +2,7 @@
 
 import Box from "@mui/material/Box";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import SectionWrapper from "@/components/common/SectionWrapper";
 import GlowText from "@/components/effects/GlowText";
@@ -15,6 +16,15 @@ const MotionBox = motion.create(Box);
 
 export default function GamesGallery() {
 	const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+	const router = useRouter();
+
+	const handleGameClick = (game: Game) => {
+		if (game.playable) {
+			router.push(`/play/${game.id}`);
+		} else {
+			setSelectedGame(game);
+		}
+	};
 
 	return (
 		<SectionWrapper id="games">
@@ -54,7 +64,7 @@ export default function GamesGallery() {
 								},
 							}}
 						>
-							<GameCard game={game} onClick={() => setSelectedGame(game)} />
+							<GameCard game={game} onClick={() => handleGameClick(game)} />
 						</MotionBox>
 					))}
 				</Box>

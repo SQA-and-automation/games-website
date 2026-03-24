@@ -23,4 +23,5 @@ export interface Game {
 	releaseYear: number;
 	accentColor: string;
 	featured: boolean;
+	playable?: boolean;
 }

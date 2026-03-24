@@ -18,12 +18,12 @@ const exo2 = Exo_2({
 });
 
 export const metadata: Metadata = {
-	title: "ELLIXMMER | Mobile Game Publisher",
-	description: "Crafting bold mobile adventures for Android & iOS. Explore our games portfolio.",
-	keywords: ["mobile games", "game publisher", "android", "ios", "ELLIXMMER"],
+	title: "ELLIXMMER | Play Games",
+	description: "Play free web games — space shooters, racing, RPG & more. No download needed.",
+	keywords: ["web games", "browser games", "play online", "space shooter", "ELLIXMMER"],
 	openGraph: {
-		title: "ELLIXMMER | Mobile Game Publisher",
-		description: "Crafting bold mobile adventures for Android & iOS.",
+		title: "ELLIXMMER | Play Games",
+		description: "Play free web games — space shooters, racing, RPG & more.",
 		type: "website",
 	},
 };

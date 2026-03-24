@@ -99,6 +99,25 @@ export default function GameCard({ game, onClick }: GameCardProps) {
 					overflow: "hidden",
 				}}
 			>
+				{/* Playable badge */}
+				{game.playable && (
+					<Chip
+						label="PLAY"
+						size="small"
+						sx={{
+							position: "absolute",
+							top: 8,
+							right: 8,
+							zIndex: 2,
+							bgcolor: "rgba(57, 255, 20, 0.2)",
+							color: "#39FF14",
+							border: "1px solid rgba(57, 255, 20, 0.4)",
+							fontWeight: 700,
+							fontSize: "0.65rem",
+							letterSpacing: "0.08em",
+						}}
+					/>
+				)}
 				<Box
 					component="img"
 					src={game.icon}
