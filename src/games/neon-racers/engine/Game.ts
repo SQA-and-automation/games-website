@@ -8,17 +8,9 @@ import {
 	SCREEN,
 	VEHICLES,
 	type VehicleId,
-	ZONES,
 } from "../config";
-import { RoadRenderer } from "../renderer/RoadRenderer";
-import type {
-	ActivePowerUp,
-	GameCallbacks,
-	GameState,
-	GameStats,
-	SavedData,
-	TrafficCar,
-} from "../types";
+import { HORIZON_Y, RoadRenderer } from "../renderer/RoadRenderer";
+import type { ActivePowerUp, GameCallbacks, GameState, GameStats, SavedData } from "../types";
 import { Road } from "./Road";
 
 const DEFAULT_SAVE: SavedData = {
@@ -37,7 +29,6 @@ export class Game {
 	private roadRenderer: RoadRenderer;
 	private callbacks: GameCallbacks;
 
-	// State
 	private state: GameState = "menu";
 	private animFrameId = 0;
 	private lastTime = 0;
@@ -45,17 +36,18 @@ export class Game {
 
 	// Player
 	private vehicleId: VehicleId = "sportcar";
-	private position = 0; // segment position (float)
+	private position = 0;
 	private playerX = 0; // -1 to 1
-	private speed = 0;
+	private speed: number = 0;
 	private maxSpeed: number = PLAYER_CFG.MAX_SPEED;
 	private crashesLeft: number = 3;
 	private invincibleUntil = 0;
 
 	// Input
-	private steerInput = 0; // -1 to 1
-	private targetSteerX: number | null = null; // touch target
+	private steerInput = 0;
+	private targetSteerX: number | null = null;
 	private keys = new Set<string>();
+	private mouseDown = false;
 
 	// Scoring
 	private score = 0;
@@ -70,18 +62,15 @@ export class Game {
 	// Power-ups
 	private activePowerUp: ActivePowerUp | null = null;
 
-	// Traffic & items
-	private trafficSpawnTimer = 0;
+	// Zone tracking
 	private lastZoneName = "";
 
-	// Audio placeholder
+	// Audio
 	private audioCtx: AudioContext | null = null;
 	private engineOsc: OscillatorNode | null = null;
 	private engineGain: GainNode | null = null;
 	private masterGain: GainNode | null = null;
 	private _muted = false;
-
-	// Music layers
 	private bassOsc: OscillatorNode | null = null;
 	private bassGain: GainNode | null = null;
 	private drumInterval: ReturnType<typeof setInterval> | null = null;
@@ -92,13 +81,12 @@ export class Game {
 		canvas.width = SCREEN.WIDTH;
 		canvas.height = SCREEN.HEIGHT;
 		const ctx = canvas.getContext("2d");
-		if (!ctx) throw new Error("Canvas 2D context not available");
+		if (!ctx) throw new Error("No 2D context");
 		this.ctx = ctx;
 		this.callbacks = callbacks;
 		this.road = new Road();
 		this.roadRenderer = new RoadRenderer(ctx);
 
-		// Input
 		window.addEventListener("keydown", this.onKeyDown);
 		window.addEventListener("keyup", this.onKeyUp);
 		canvas.addEventListener("touchstart", this.onTouchStart, { passive: false });
@@ -112,8 +100,8 @@ export class Game {
 	}
 
 	start(vehicleId: VehicleId) {
-		this.vehicleId = vehicleId;
 		const v = VEHICLES[vehicleId];
+		this.vehicleId = vehicleId;
 		this.maxSpeed = PLAYER_CFG.MAX_SPEED * v.speedMult;
 		this.crashesLeft = v.maxCrashes;
 		this.position = 0;
@@ -129,17 +117,9 @@ export class Game {
 		this.comboTimer = 0;
 		this.comboMultiplier = 1;
 		this.activePowerUp = null;
-		this.trafficSpawnTimer = 0;
 		this.lastZoneName = "";
 		this.time = 0;
-
-		// Clear traffic & items from road
-		for (const seg of this.road.segments) {
-			seg.trafficCar = undefined;
-			seg.coin = undefined;
-			seg.powerUp = undefined;
-		}
-
+		this.road.clearItems();
 		this.initAudio();
 		this.state = "playing";
 		this.callbacks.onStateChange("playing");
@@ -170,9 +150,7 @@ export class Game {
 	private saveData(data: SavedData) {
 		try {
 			localStorage.setItem("neonRacers", JSON.stringify(data));
-		} catch {
-			/* unavailable */
-		}
+		} catch {}
 	}
 
 	destroy() {
@@ -189,120 +167,93 @@ export class Game {
 		this.audioCtx?.close();
 	}
 
-	// === INPUT ===
-
+	// Input handlers
 	private onKeyDown = (e: KeyboardEvent) => {
 		this.keys.add(e.key);
 	};
 	private onKeyUp = (e: KeyboardEvent) => {
 		this.keys.delete(e.key);
 	};
-
-	private screenToPlayerX(clientX: number): number {
+	private screenToX(clientX: number): number {
 		const rect = this.canvas.getBoundingClientRect();
-		const ratio = (clientX - rect.left) / rect.width;
-		return (ratio - 0.5) * 2; // -1 to 1
+		return ((clientX - rect.left) / rect.width - 0.5) * 2;
 	}
-
 	private onTouchStart = (e: TouchEvent) => {
 		e.preventDefault();
-		this.targetSteerX = this.screenToPlayerX(e.touches[0].clientX);
+		this.targetSteerX = this.screenToX(e.touches[0].clientX);
 	};
 	private onTouchMove = (e: TouchEvent) => {
 		e.preventDefault();
-		this.targetSteerX = this.screenToPlayerX(e.touches[0].clientX);
+		this.targetSteerX = this.screenToX(e.touches[0].clientX);
 	};
 	private onTouchEnd = () => {
 		this.targetSteerX = null;
 	};
-	private mouseDown = false;
 	private onMouseDown = (e: MouseEvent) => {
 		this.mouseDown = true;
-		this.targetSteerX = this.screenToPlayerX(e.clientX);
+		this.targetSteerX = this.screenToX(e.clientX);
 	};
 	private onMouseMove = (e: MouseEvent) => {
-		if (!this.mouseDown) return;
-		this.targetSteerX = this.screenToPlayerX(e.clientX);
+		if (this.mouseDown) this.targetSteerX = this.screenToX(e.clientX);
 	};
 	private onMouseUp = () => {
 		this.mouseDown = false;
 		this.targetSteerX = null;
 	};
 
-	// === GAME LOOP ===
-
+	// Game loop
 	private loop(timestamp: number) {
 		if (this.state !== "playing") return;
-
-		const rawDt = Math.min((timestamp - this.lastTime) / 1000, 0.05);
+		const dt = Math.min((timestamp - this.lastTime) / 1000, 0.05);
 		this.lastTime = timestamp;
 		this.time = timestamp;
-
-		const slowFactor =
-			this.activePowerUp?.type === "SLOW_MO" ? POWERUPS_CFG.TYPES.SLOW_MO.factor : 1;
-
-		this.update(rawDt, slowFactor);
+		const slow = this.activePowerUp?.type === "SLOW_MO" ? POWERUPS_CFG.TYPES.SLOW_MO.factor : 1;
+		this.update(dt, slow);
 		this.draw();
-
 		this.animFrameId = requestAnimationFrame(this.loop);
 	}
 
-	private update(dt: number, slowFactor: number) {
-		const vehicle = VEHICLES[this.vehicleId];
+	private update(dt: number, slow: number) {
+		const v = VEHICLES[this.vehicleId];
 
-		// Steering input
+		// Steering
 		this.steerInput = 0;
 		if (this.keys.has("ArrowLeft") || this.keys.has("a")) this.steerInput = -1;
 		if (this.keys.has("ArrowRight") || this.keys.has("d")) this.steerInput = 1;
-
 		if (this.targetSteerX !== null) {
-			const diff = this.targetSteerX - this.playerX;
-			this.steerInput = Math.max(-1, Math.min(1, diff * 3));
+			this.steerInput = Math.max(-1, Math.min(1, (this.targetSteerX - this.playerX) * 3));
 		}
 
 		// Speed
 		this.speed = Math.min(this.maxSpeed, this.speed + PLAYER_CFG.ACCEL * dt);
-
-		// Nitro boost
 		if (this.activePowerUp?.type === "NITRO") {
 			this.speed = Math.min(this.maxSpeed * 1.8, this.speed + PLAYER_CFG.ACCEL * 3 * dt);
 		}
 
-		// Steering
-		const steerAmount =
-			this.steerInput *
-			PLAYER_CFG.STEER_SPEED *
-			vehicle.handling *
-			dt *
-			(this.speed / this.maxSpeed);
-		this.playerX += steerAmount;
+		// Steer
+		const steer =
+			this.steerInput * PLAYER_CFG.STEER_SPEED * v.handling * dt * (this.speed / this.maxSpeed);
+		this.playerX += steer;
 
-		// Centrifugal force from curves
-		const currentSeg = this.road.getSegment(Math.floor(this.position));
-		if (currentSeg) {
-			this.playerX += currentSeg.curve * PLAYER_CFG.CENTRIFUGAL * (this.speed / this.maxSpeed) * dt;
-		}
-
-		// Clamp player position
+		// Centrifugal from curves
+		const curve = this.road.getCurve(Math.floor(this.position));
+		this.playerX += curve * PLAYER_CFG.CENTRIFUGAL * (this.speed / this.maxSpeed) * dt;
 		this.playerX = Math.max(-1.2, Math.min(1.2, this.playerX));
 
-		// Off-road deceleration
-		if (Math.abs(this.playerX) > 0.9) {
+		// Off-road slow
+		if (Math.abs(this.playerX) > 0.85) {
 			this.speed = Math.max(
 				PLAYER_CFG.START_SPEED * 0.5,
 				this.speed - PLAYER_CFG.OFF_ROAD_DECEL * dt,
 			);
 		}
 
-		// Move forward
-		const effectiveSpeed = this.speed * slowFactor;
-		this.position += (effectiveSpeed * dt) / ROAD.SEGMENT_LENGTH;
+		// Move
+		this.position += (this.speed * slow * dt) / ROAD.SEGMENT_LENGTH;
 		this.distance = Math.floor(this.position);
-
-		// Score from distance
 		this.score = Math.floor(this.distance * SCORING.DISTANCE_MULT);
 
-		// Combo timer
+		// Combo decay
 		if (this.comboTimer > 0) {
 			this.comboTimer -= dt * 1000;
 			if (this.comboTimer <= 0) {
@@ -314,163 +265,124 @@ export class Game {
 		// Power-up timer
 		if (this.activePowerUp && this.activePowerUp.duration > 0) {
 			this.activePowerUp.remaining -= dt * 1000;
-			if (this.activePowerUp.remaining <= 0) {
-				this.activePowerUp = null;
-			}
+			if (this.activePowerUp.remaining <= 0) this.activePowerUp = null;
 		}
 
-		// Zone change
-		const { zone, cycleNum } = this.road.getZone(Math.floor(this.position));
+		// Zone
+		const { zone, cycleNum } = this.road.getZone(this.distance);
 		if (zone.name !== this.lastZoneName) {
 			this.lastZoneName = zone.name;
 			this.callbacks.onZoneChange(zone.name);
 		}
 
-		// Spawn traffic, coins, power-ups ahead
+		// Spawn items ahead
 		this.spawnItems(cycleNum);
 
-		// Check collisions with traffic
-		this.checkTrafficCollisions();
+		// Collisions
+		this.checkCollisions();
 
-		// Check coin/powerup collection
-		this.checkItemCollection();
-
-		// Update engine audio
+		// Audio
 		this.updateEngineSound();
-
-		// Update music layers
 		this.updateMusicLayers();
 
-		// Callbacks
-		this.callbacks.onStatsUpdate(this.getStats(zone.name));
+		this.callbacks.onStatsUpdate({
+			distance: this.distance,
+			speed: Math.floor(this.speed),
+			score: this.score,
+			coins: this.coinsCollected,
+			overtakes: this.overtakes,
+			nearMisses: this.nearMisses,
+			combo: this.comboMultiplier,
+			crashesLeft: this.crashesLeft,
+			zone: zone.name,
+			activePowerUp: this.activePowerUp ? { ...this.activePowerUp } : null,
+		});
 	}
 
 	private spawnItems(cycleNum: number) {
-		const ahead = Math.floor(this.position) + ROAD.VISIBLE_SEGMENTS;
-		const spawnStart = Math.max(Math.floor(this.position) + 20, ahead - 30);
+		const ahead = this.distance + 80;
+		const start = this.distance + 15;
+		const diffMult = 1 + cycleNum * 0.3;
 
-		for (let i = spawnStart; i < ahead; i++) {
-			const seg = this.road.getSegment(i);
-			if (!seg) continue;
-
-			// Don't re-spawn on segments that already have stuff
-			if (seg.trafficCar || seg.coin || seg.powerUp) continue;
-
-			const difficultyMult = 1 + cycleNum * 0.3;
-
-			// Traffic
-			if (Math.random() < 0.03 * difficultyMult) {
-				const { zone } = this.road.getZone(i);
-				const types = zone.trafficTypes;
-				seg.trafficCar = {
-					offset: (Math.random() - 0.5) * 1.4,
-					type: types[Math.floor(Math.random() * types.length)],
-					speed: 0.3 + Math.random() * 0.4,
-					passed: false,
-				};
-			}
-
-			// Coins
-			if (Math.random() < COINS.SPAWN_CHANCE) {
-				seg.coin = true;
-			}
-
-			// Power-ups
-			if (Math.random() < POWERUPS_CFG.SPAWN_CHANCE) {
-				const types = Object.keys(POWERUPS_CFG.TYPES) as PowerUpId[];
-				seg.powerUp = types[Math.floor(Math.random() * types.length)];
+		for (let i = start; i < ahead; i++) {
+			if (!this.road.getTraffic(i) && !this.road.hasCoin(i) && !this.road.getPowerUp(i)) {
+				if (Math.random() < 0.025 * diffMult) {
+					const { zone } = this.road.getZone(i);
+					const types = zone.trafficTypes;
+					this.road.setTraffic(
+						i,
+						(Math.random() - 0.5) * 1.4,
+						types[Math.floor(Math.random() * types.length)],
+						0.3 + Math.random() * 0.4,
+					);
+				}
+				if (Math.random() < COINS.SPAWN_CHANCE) this.road.setCoin(i);
+				if (Math.random() < POWERUPS_CFG.SPAWN_CHANCE) {
+					const types = Object.keys(POWERUPS_CFG.TYPES) as PowerUpId[];
+					this.road.setPowerUp(i, types[Math.floor(Math.random() * types.length)]);
+				}
 			}
 		}
 	}
 
-	private checkTrafficCollisions() {
-		const playerSeg = Math.floor(this.position);
+	private checkCollisions() {
+		const seg = this.distance;
 		const isGhost = this.activePowerUp?.type === "GHOST";
 		const isInvincible = Date.now() < this.invincibleUntil;
 		const isPolice = this.vehicleId === "police";
 
 		for (let i = -2; i <= 2; i++) {
-			const idx = playerSeg + i;
-			if (idx < 0) continue;
-			const seg = this.road.getSegment(idx);
-			if (!seg?.trafficCar) continue;
+			const s = seg + i;
+			const t = this.road.getTraffic(s);
+			if (!t) continue;
 
-			const car = seg.trafficCar;
-
-			// Check overtake
-			if (!car.passed && i < 0) {
-				car.passed = true;
+			// Overtake check
+			if (!t.passed && i < 0) {
+				this.road.markPassed(s);
 				this.overtakes++;
 				this.comboKills++;
 				this.comboTimer = SCORING.COMBO_TIMEOUT;
 				this.updateCombo();
+				this.score += SCORING.OVERTAKE * this.comboMultiplier;
 
-				const points = SCORING.OVERTAKE * this.comboMultiplier;
-				this.score += points;
-
-				// Near miss check
-				const lateralDist = Math.abs(this.playerX - car.offset);
+				const lateralDist = Math.abs(this.playerX - t.offset);
 				if (lateralDist < SCORING.NEAR_MISS_THRESHOLD * 2 && lateralDist > 0.05) {
 					this.nearMisses++;
 					this.score += SCORING.NEAR_MISS * this.comboMultiplier;
 					this.callbacks.onNearMiss();
 				}
-
-				this.playOvertakeSFX();
+				this.playSFX(600 + this.comboMultiplier * 100, "sine", 0.08, 0.08);
 				continue;
 			}
 
-			// Collision check (only on same segment ±1)
 			if (Math.abs(i) > 1) continue;
-			const lateralDist = Math.abs(this.playerX - car.offset);
-			if (lateralDist < 0.25) {
+			if (Math.abs(this.playerX - t.offset) < 0.25) {
 				if (isGhost) continue;
-
-				// Police pushes traffic
 				if (isPolice) {
-					car.offset += car.offset < this.playerX ? -0.5 : 0.5;
+					t.offset += t.offset < this.playerX ? -0.5 : 0.5;
 					continue;
 				}
-
 				if (isInvincible) continue;
-
-				// CRASH
 				this.onCrash();
-				seg.trafficCar = undefined;
+				this.road.removeTraffic(s);
 				break;
 			}
 		}
-	}
 
-	private checkItemCollection() {
-		const playerSeg = Math.floor(this.position);
+		// Coins & power-ups
 		const hasMagnet = this.activePowerUp?.type === "MAGNET";
-		const magnetRange = hasMagnet ? POWERUPS_CFG.TYPES.MAGNET.range : 0.3;
-
 		for (let i = -1; i <= 1; i++) {
-			const idx = playerSeg + i;
-			if (idx < 0) continue;
-			const seg = this.road.getSegment(idx);
-			if (!seg) continue;
-
-			// Coins
-			if (seg.coin) {
-				// Magnet widens collection range
-				if (Math.abs(this.playerX) < magnetRange || hasMagnet) {
-					seg.coin = undefined;
-					this.coinsCollected += COINS.BASE_VALUE;
-					this.score += COINS.BASE_VALUE;
-					this.playCoinSFX();
-				}
+			const s = seg + i;
+			if (this.road.hasCoin(s) && (Math.abs(this.playerX) < 0.4 || hasMagnet)) {
+				this.road.removeCoin(s);
+				this.coinsCollected += COINS.BASE_VALUE;
+				this.score += COINS.BASE_VALUE;
+				this.playSFX(880, "sine", 0.06, 0.06);
 			}
-
-			// Power-ups
-			if (seg.powerUp && i === 0) {
-				if (Math.abs(this.playerX) < 0.4) {
-					const type = seg.powerUp;
-					seg.powerUp = undefined;
-					this.activatePowerUp(type);
-				}
+			const pu = this.road.getPowerUp(s);
+			if (pu && i === 0 && Math.abs(this.playerX) < 0.4) {
+				this.road.removePowerUp(s);
+				this.activatePowerUp(pu as PowerUpId);
 			}
 		}
 	}
@@ -478,17 +390,11 @@ export class Game {
 	private activatePowerUp(type: PowerUpId) {
 		const cfg = POWERUPS_CFG.TYPES[type];
 		if (type === "SHIELD") {
-			// Shield is instant — adds 1 crash tolerance
 			this.crashesLeft++;
-			this.playPowerUpSFX();
-			return;
+		} else {
+			this.activePowerUp = { type, remaining: cfg.duration, duration: cfg.duration };
 		}
-		this.activePowerUp = {
-			type,
-			remaining: cfg.duration,
-			duration: cfg.duration,
-		};
-		this.playPowerUpSFX();
+		this.playSFX(523, "sine", 0.15, 0.1);
 	}
 
 	private onCrash() {
@@ -496,33 +402,39 @@ export class Game {
 		this.crashesLeft--;
 		this.comboKills = 0;
 		this.comboMultiplier = 1;
-		this.comboTimer = 0;
 		this.invincibleUntil = Date.now() + PLAYER_CFG.CRASH_INVINCIBLE;
 		this.callbacks.onCrash();
 		this.playCrashSFX();
-
-		if (this.crashesLeft <= 0) {
-			this.onGameOver();
-		}
+		if (this.crashesLeft <= 0) this.onGameOver();
 	}
 
 	private onGameOver() {
 		this.state = "game-over";
 		this.stopAudio();
-
-		// Save
 		const data = this.getSavedData();
-		const isNewRecord = this.distance > data.bestDistance;
+		const isNew = this.distance > data.bestDistance;
 		data.totalCoins += this.coinsCollected;
-		if (isNewRecord) {
+		if (isNew) {
 			data.bestDistance = this.distance;
 			data.bestZone = this.lastZoneName;
 		}
 		data.totalRuns++;
 		this.saveData(data);
-
-		const stats = this.getStats(this.lastZoneName);
-		this.callbacks.onGameOver(stats, isNewRecord);
+		this.callbacks.onGameOver(
+			{
+				distance: this.distance,
+				speed: 0,
+				score: this.score,
+				coins: this.coinsCollected,
+				overtakes: this.overtakes,
+				nearMisses: this.nearMisses,
+				combo: 1,
+				crashesLeft: 0,
+				zone: this.lastZoneName,
+				activePowerUp: null,
+			},
+			isNew,
+		);
 		this.callbacks.onStateChange("game-over");
 	}
 
@@ -536,55 +448,34 @@ export class Game {
 		}
 	}
 
-	private getStats(zoneName: string): GameStats {
-		return {
-			distance: this.distance,
-			speed: Math.floor(this.speed),
-			score: this.score,
-			coins: this.coinsCollected,
-			overtakes: this.overtakes,
-			nearMisses: this.nearMisses,
-			combo: this.comboMultiplier,
-			crashesLeft: this.crashesLeft,
-			zone: zoneName,
-			activePowerUp: this.activePowerUp ? { ...this.activePowerUp } : null,
-		};
-	}
-
 	// === DRAW ===
 
 	private draw() {
 		const ctx = this.ctx;
-		const segIndex = Math.floor(this.position);
-		const { zone } = this.road.getZone(segIndex);
-
-		// Project road
-		this.road.project(this.position, this.playerX);
+		const { zone } = this.road.getZone(this.distance);
 
 		// Sky
 		this.roadRenderer.drawSky(zone);
 		this.roadRenderer.drawHorizonGlow(zone, this.time);
 
 		// Road
-		this.roadRenderer.drawRoad(this.road, this.position);
+		this.roadRenderer.drawRoad(this.road, this.position, this.playerX);
 
-		// Traffic, coins, power-ups (drawn on road segments)
-		this.drawItems(segIndex);
+		// Draw items on road
+		this.drawItems();
 
-		// Player vehicle
+		// Player
 		this.drawPlayer();
 
 		// Speed lines
 		this.roadRenderer.drawSpeedLines(ctx, this.speed, this.maxSpeed);
 
 		// Nitro trails
-		if (this.activePowerUp?.type === "NITRO") {
-			this.drawNitroTrails();
-		}
+		if (this.activePowerUp?.type === "NITRO") this.drawNitroTrails();
 
-		// Ghost overlay
+		// Ghost tint
 		if (this.activePowerUp?.type === "GHOST") {
-			ctx.globalAlpha = 0.3;
+			ctx.globalAlpha = 0.15;
 			ctx.fillStyle = "#7B61FF";
 			ctx.fillRect(0, 0, SCREEN.WIDTH, SCREEN.HEIGHT);
 			ctx.globalAlpha = 1;
@@ -594,68 +485,65 @@ export class Game {
 		this.drawVignette();
 	}
 
-	private drawItems(baseIndex: number) {
+	private drawItems() {
 		const ctx = this.ctx;
+		// Draw items for nearby segments — position them at the screen Y based on their distance
+		for (let offset = 60; offset >= -2; offset--) {
+			const segIdx = this.distance + offset;
+			if (offset < 0) continue;
 
-		for (let n = ROAD.VISIBLE_SEGMENTS - 1; n > 0; n--) {
-			const segIndex = (baseIndex + n) % this.road.length;
-			const seg = this.road.getSegment(segIndex);
-			if (!seg) continue;
+			// Calculate screen Y for this segment distance
+			const zDist = offset + (this.position - Math.floor(this.position));
+			if (zDist <= 0) continue;
+			const perspective = (150 * 120) / (zDist * ROAD.SEGMENT_LENGTH);
+			const screenY = HORIZON_Y + perspective;
+			if (screenY > SCREEN.HEIGHT || screenY < HORIZON_Y) continue;
 
-			if (seg.p2.y >= SCREEN.HEIGHT || seg.p2.w < 2) continue;
+			// Road width at this Y
+			const roadW = (0.45 * SCREEN.WIDTH) / ((zDist * ROAD.SEGMENT_LENGTH * 0.08) / 120);
+			const scale = roadW / (SCREEN.WIDTH * 0.45);
 
-			const scale = seg.p2.w / ROAD.WIDTH;
+			// Road center at this Y (simplified — no curve accumulation for items)
+			const centerX = SCREEN.WIDTH / 2 - this.playerX * roadW * 0.5;
 
-			// Traffic car
-			if (seg.trafficCar) {
-				const car = seg.trafficCar;
-				const carX = seg.p2.x + car.offset * (seg.p2.w / 2);
-				const carW = Math.max(4, 24 * scale * 40);
-				const carH = carW * 1.2;
-
-				ctx.fillStyle = this.getTrafficColor(car.type);
-				ctx.fillRect(carX - carW / 2, seg.p2.y - carH, carW, carH);
-
+			// Traffic
+			const traffic = this.road.getTraffic(segIdx);
+			if (traffic) {
+				const carX = centerX + traffic.offset * roadW;
+				const carW = Math.max(3, 18 * scale);
+				const carH = Math.max(4, 24 * scale);
+				const color = this.getTrafficColor(traffic.type);
+				ctx.fillStyle = color;
+				ctx.fillRect(carX - carW / 2, screenY - carH, carW, carH);
 				// Tail lights
 				ctx.fillStyle = "#FF3131";
-				ctx.fillRect(carX - carW / 2 + 2, seg.p2.y - 3, 3, 2);
-				ctx.fillRect(carX + carW / 2 - 5, seg.p2.y - 3, 3, 2);
+				const tlS = Math.max(1, 2 * scale);
+				ctx.fillRect(carX - carW / 2 + 1, screenY - tlS - 1, tlS, tlS);
+				ctx.fillRect(carX + carW / 2 - tlS - 1, screenY - tlS - 1, tlS, tlS);
 			}
 
-			// Coin
-			if (seg.coin) {
-				const coinX = seg.p2.x;
-				const coinSize = Math.max(2, 6 * scale * 40);
-				const pulse = 1 + Math.sin(this.time * 0.005 + segIndex) * 0.2;
-
+			// Coins
+			if (this.road.hasCoin(segIdx)) {
+				const coinR = Math.max(2, 4 * scale);
+				const pulse = 1 + Math.sin(this.time * 0.005 + segIdx) * 0.2;
 				ctx.beginPath();
-				ctx.arc(coinX, seg.p2.y - coinSize, coinSize * pulse, 0, Math.PI * 2);
+				ctx.arc(centerX, screenY - coinR * 2, coinR * pulse, 0, Math.PI * 2);
 				ctx.fillStyle = "#FFD700";
 				ctx.fill();
-				ctx.shadowColor = "#FFD700";
-				ctx.shadowBlur = 4;
-				ctx.fill();
-				ctx.shadowBlur = 0;
 			}
 
-			// Power-up
-			if (seg.powerUp) {
-				const puX = seg.p2.x;
-				const puSize = Math.max(3, 8 * scale * 40);
-				const color = POWERUPS_CFG.TYPES[seg.powerUp].color;
-				const pulse = 1 + Math.sin(this.time * 0.006 + segIndex) * 0.25;
-
+			// Power-ups
+			const pu = this.road.getPowerUp(segIdx);
+			if (pu) {
+				const puR = Math.max(3, 5 * scale);
+				const color = POWERUPS_CFG.TYPES[pu as PowerUpId]?.color ?? "#FFFFFF";
 				ctx.beginPath();
-				ctx.arc(puX, seg.p2.y - puSize * 1.5, puSize * pulse, 0, Math.PI * 2);
-				ctx.fillStyle = `${color}60`;
+				ctx.arc(centerX, screenY - puR * 2, puR, 0, Math.PI * 2);
+				ctx.fillStyle = `${color}80`;
 				ctx.fill();
 				ctx.strokeStyle = color;
-				ctx.lineWidth = 2;
+				ctx.lineWidth = 1;
 				ctx.stroke();
-				ctx.shadowColor = color;
-				ctx.shadowBlur = 8;
-				ctx.stroke();
-				ctx.shadowBlur = 0;
 			}
 		}
 	}
@@ -683,75 +571,54 @@ export class Game {
 
 	private drawPlayer() {
 		const ctx = this.ctx;
-		const vehicle = VEHICLES[this.vehicleId];
-		const cx = SCREEN.WIDTH / 2 + this.steerInput * 15;
-		const cy = SCREEN.HEIGHT - 80;
-		const w = 28;
-		const h = 36;
+		const v = VEHICLES[this.vehicleId];
+		const cx = SCREEN.WIDTH / 2 + this.steerInput * 12;
+		const cy = SCREEN.HEIGHT - 70;
 
-		// Invincibility flash
-		if (Date.now() < this.invincibleUntil && Math.floor(Date.now() / 100) % 2 === 0) {
+		if (Date.now() < this.invincibleUntil && Math.floor(Date.now() / 100) % 2 === 0)
 			ctx.globalAlpha = 0.4;
-		}
+		if (this.activePowerUp?.type === "GHOST") ctx.globalAlpha = 0.5;
 
-		// Ghost transparency
-		if (this.activePowerUp?.type === "GHOST") {
-			ctx.globalAlpha = 0.5;
-		}
-
-		// Vehicle body
-		const color = vehicle.color;
+		// Car body
 		ctx.beginPath();
-		ctx.moveTo(cx, cy - h / 2); // nose
-		ctx.lineTo(cx + w / 2, cy + h * 0.2); // right
-		ctx.lineTo(cx + w / 2 - 3, cy + h / 2); // right rear
-		ctx.lineTo(cx - w / 2 + 3, cy + h / 2); // left rear
-		ctx.lineTo(cx - w / 2, cy + h * 0.2); // left
+		ctx.moveTo(cx, cy - 18);
+		ctx.lineTo(cx + 14, cy + 4);
+		ctx.lineTo(cx + 11, cy + 18);
+		ctx.lineTo(cx - 11, cy + 18);
+		ctx.lineTo(cx - 14, cy + 4);
 		ctx.closePath();
-		ctx.fillStyle = color;
+		ctx.fillStyle = v.color;
 		ctx.fill();
 
 		// Windshield
-		ctx.beginPath();
-		ctx.moveTo(cx - 6, cy - h * 0.15);
-		ctx.lineTo(cx + 6, cy - h * 0.15);
-		ctx.lineTo(cx + 5, cy + 2);
-		ctx.lineTo(cx - 5, cy + 2);
-		ctx.closePath();
-		ctx.fillStyle = "#FFFFFF40";
-		ctx.fill();
+		ctx.fillStyle = "#FFFFFF30";
+		ctx.fillRect(cx - 5, cy - 8, 10, 8);
 
 		// Tail lights
 		ctx.fillStyle = "#FF3131";
-		ctx.fillRect(cx - w / 2 + 2, cy + h / 2 - 4, 4, 3);
-		ctx.fillRect(cx + w / 2 - 6, cy + h / 2 - 4, 4, 3);
+		ctx.fillRect(cx - 11, cy + 14, 4, 3);
+		ctx.fillRect(cx + 7, cy + 14, 4, 3);
 
 		// Engine glow
-		ctx.shadowColor = color;
-		ctx.shadowBlur = 8;
-		ctx.fillStyle = color;
-		ctx.fillRect(cx - 3, cy + h / 2, 6, 4);
+		ctx.shadowColor = v.color;
+		ctx.shadowBlur = 6;
+		ctx.fillStyle = v.color;
+		ctx.fillRect(cx - 3, cy + 18, 6, 3);
 		ctx.shadowBlur = 0;
-
 		ctx.globalAlpha = 1;
 	}
 
 	private drawNitroTrails() {
 		const ctx = this.ctx;
-		const cx = SCREEN.WIDTH / 2 + this.steerInput * 15;
-		const cy = SCREEN.HEIGHT - 60;
-
-		for (let i = 0; i < 2; i++) {
-			const offsetX = i === 0 ? -8 : 8;
-			const trailLen = 30 + Math.random() * 20;
-
-			const gradient = ctx.createLinearGradient(cx + offsetX, cy, cx + offsetX, cy + trailLen);
-			gradient.addColorStop(0, "#00F0FF80");
-			gradient.addColorStop(0.5, "#00F0FF40");
-			gradient.addColorStop(1, "transparent");
-
-			ctx.fillStyle = gradient;
-			ctx.fillRect(cx + offsetX - 2, cy, 4, trailLen);
+		const cx = SCREEN.WIDTH / 2 + this.steerInput * 12;
+		const cy = SCREEN.HEIGHT - 49;
+		for (const ox of [-7, 7]) {
+			const len = 20 + Math.random() * 15;
+			const grad = ctx.createLinearGradient(cx + ox, cy, cx + ox, cy + len);
+			grad.addColorStop(0, "#00F0FF60");
+			grad.addColorStop(1, "transparent");
+			ctx.fillStyle = grad;
+			ctx.fillRect(cx + ox - 2, cy, 4, len);
 		}
 	}
 
@@ -762,7 +629,7 @@ export class Game {
 			this.vignetteCanvas.width = SCREEN.WIDTH;
 			this.vignetteCanvas.height = SCREEN.HEIGHT;
 			const vCtx = this.vignetteCanvas.getContext("2d")!;
-			const gradient = vCtx.createRadialGradient(
+			const g = vCtx.createRadialGradient(
 				SCREEN.WIDTH / 2,
 				SCREEN.HEIGHT / 2,
 				SCREEN.WIDTH * 0.3,
@@ -770,108 +637,99 @@ export class Game {
 				SCREEN.HEIGHT / 2,
 				SCREEN.WIDTH * 0.8,
 			);
-			gradient.addColorStop(0, "transparent");
-			gradient.addColorStop(1, "rgba(0, 0, 0, 0.45)");
-			vCtx.fillStyle = gradient;
+			g.addColorStop(0, "transparent");
+			g.addColorStop(1, "rgba(0,0,0,0.4)");
+			vCtx.fillStyle = g;
 			vCtx.fillRect(0, 0, SCREEN.WIDTH, SCREEN.HEIGHT);
 		}
 		this.ctx.drawImage(this.vignetteCanvas, 0, 0);
 	}
 
 	// === AUDIO ===
-
 	private initAudio() {
 		try {
 			this.audioCtx = new AudioContext();
 			this.masterGain = this.audioCtx.createGain();
 			this.masterGain.gain.value = this._muted ? 0 : 0.4;
 			this.masterGain.connect(this.audioCtx.destination);
-
-			// Engine drone
+			// Engine
 			this.engineOsc = this.audioCtx.createOscillator();
 			this.engineGain = this.audioCtx.createGain();
 			this.engineOsc.type = "sawtooth";
 			this.engineOsc.frequency.value = 80;
-			this.engineGain.gain.value = 0.04;
-			const engineFilter = this.audioCtx.createBiquadFilter();
-			engineFilter.type = "lowpass";
-			engineFilter.frequency.value = 300;
-			this.engineOsc.connect(engineFilter);
-			engineFilter.connect(this.engineGain);
+			this.engineGain.gain.value = 0.03;
+			const ef = this.audioCtx.createBiquadFilter();
+			ef.type = "lowpass";
+			ef.frequency.value = 300;
+			this.engineOsc.connect(ef);
+			ef.connect(this.engineGain);
 			this.engineGain.connect(this.masterGain);
 			this.engineOsc.start();
-
-			// Bass layer (always on)
+			// Bass
 			this.bassOsc = this.audioCtx.createOscillator();
 			this.bassGain = this.audioCtx.createGain();
 			this.bassOsc.type = "sawtooth";
 			this.bassOsc.frequency.value = 55;
-			this.bassGain.gain.value = 0.06;
-			const bassFilter = this.audioCtx.createBiquadFilter();
-			bassFilter.type = "lowpass";
-			bassFilter.frequency.value = 150;
-			this.bassOsc.connect(bassFilter);
-			bassFilter.connect(this.bassGain);
+			this.bassGain.gain.value = 0.05;
+			const bf = this.audioCtx.createBiquadFilter();
+			bf.type = "lowpass";
+			bf.frequency.value = 150;
+			this.bassOsc.connect(bf);
+			bf.connect(this.bassGain);
 			this.bassGain.connect(this.masterGain);
 			this.bassOsc.start();
-		} catch {
-			/* Web Audio unavailable */
-		}
+		} catch {}
 	}
 
 	private updateEngineSound() {
 		if (!this.engineOsc || !this.audioCtx) return;
-		const ratio = this.speed / this.maxSpeed;
-		this.engineOsc.frequency.setTargetAtTime(60 + ratio * 200, this.audioCtx.currentTime, 0.1);
-		if (this.engineGain) {
-			this.engineGain.gain.setTargetAtTime(0.02 + ratio * 0.05, this.audioCtx.currentTime, 0.1);
-		}
+		const r = this.speed / this.maxSpeed;
+		this.engineOsc.frequency.setTargetAtTime(60 + r * 200, this.audioCtx.currentTime, 0.1);
+		if (this.engineGain)
+			this.engineGain.gain.setTargetAtTime(0.02 + r * 0.04, this.audioCtx.currentTime, 0.1);
 	}
 
 	private updateMusicLayers() {
 		if (!this.audioCtx || !this.masterGain) return;
-		const ratio = this.speed / this.maxSpeed;
-
-		// Drums layer at medium speed
-		if (ratio > 0.4 && !this.drumInterval) {
+		const r = this.speed / this.maxSpeed;
+		if (r > 0.4 && !this.drumInterval) {
 			this.drumInterval = setInterval(() => {
 				if (!this.audioCtx || !this.masterGain) return;
-				const osc = this.audioCtx.createOscillator();
-				const gain = this.audioCtx.createGain();
-				osc.type = "sine";
-				osc.frequency.setValueAtTime(120, this.audioCtx.currentTime);
-				osc.frequency.exponentialRampToValueAtTime(40, this.audioCtx.currentTime + 0.08);
-				gain.gain.setValueAtTime(0.06, this.audioCtx.currentTime);
-				gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.1);
-				osc.connect(gain);
-				gain.connect(this.masterGain);
-				osc.start();
-				osc.stop(this.audioCtx.currentTime + 0.1);
+				const o = this.audioCtx.createOscillator();
+				const g = this.audioCtx.createGain();
+				o.type = "sine";
+				o.frequency.setValueAtTime(120, this.audioCtx.currentTime);
+				o.frequency.exponentialRampToValueAtTime(40, this.audioCtx.currentTime + 0.08);
+				g.gain.setValueAtTime(0.05, this.audioCtx.currentTime);
+				g.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.1);
+				o.connect(g);
+				g.connect(this.masterGain);
+				o.start();
+				o.stop(this.audioCtx.currentTime + 0.1);
 			}, 250);
-		} else if (ratio <= 0.4 && this.drumInterval) {
+		} else if (r <= 0.4 && this.drumInterval) {
 			clearInterval(this.drumInterval);
 			this.drumInterval = null;
 		}
 
-		// Arp layer at high speed
-		if (ratio > 0.7 && !this.arpInterval) {
+		if (r > 0.7 && !this.arpInterval) {
 			const notes = [220, 277, 330, 440, 330, 277];
 			let idx = 0;
 			this.arpInterval = setInterval(() => {
 				if (!this.audioCtx || !this.masterGain) return;
-				const osc = this.audioCtx.createOscillator();
-				const gain = this.audioCtx.createGain();
-				osc.type = "triangle";
-				osc.frequency.value = notes[idx % notes.length];
+				const o = this.audioCtx.createOscillator();
+				const g = this.audioCtx.createGain();
+				o.type = "triangle";
+				o.frequency.value = notes[idx % notes.length];
 				idx++;
-				gain.gain.setValueAtTime(0.03, this.audioCtx.currentTime);
-				gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.1);
-				osc.connect(gain);
-				gain.connect(this.masterGain);
-				osc.start();
-				osc.stop(this.audioCtx.currentTime + 0.12);
+				g.gain.setValueAtTime(0.03, this.audioCtx.currentTime);
+				g.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.1);
+				o.connect(g);
+				g.connect(this.masterGain);
+				o.start();
+				o.stop(this.audioCtx.currentTime + 0.12);
 			}, 120);
-		} else if (ratio <= 0.7 && this.arpInterval) {
+		} else if (r <= 0.7 && this.arpInterval) {
 			clearInterval(this.arpInterval);
 			this.arpInterval = null;
 		}
@@ -880,58 +738,45 @@ export class Game {
 	private stopAudio() {
 		try {
 			this.engineOsc?.stop();
-		} catch {
-			/* */
-		}
+		} catch {}
 		try {
 			this.bassOsc?.stop();
-		} catch {
-			/* */
-		}
+		} catch {}
 		if (this.drumInterval) clearInterval(this.drumInterval);
 		if (this.arpInterval) clearInterval(this.arpInterval);
 		this.drumInterval = null;
 		this.arpInterval = null;
 	}
 
-	private playSFX(freq: number, type: OscillatorType, duration: number, vol = 0.1) {
+	private playSFX(freq: number, type: OscillatorType, dur: number, vol = 0.1) {
 		if (!this.audioCtx || !this.masterGain) return;
-		const osc = this.audioCtx.createOscillator();
-		const gain = this.audioCtx.createGain();
-		osc.type = type;
-		osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
-		osc.frequency.exponentialRampToValueAtTime(freq * 0.5, this.audioCtx.currentTime + duration);
-		gain.gain.setValueAtTime(vol, this.audioCtx.currentTime);
-		gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + duration);
-		osc.connect(gain);
-		gain.connect(this.masterGain);
-		osc.start();
-		osc.stop(this.audioCtx.currentTime + duration);
+		const o = this.audioCtx.createOscillator();
+		const g = this.audioCtx.createGain();
+		o.type = type;
+		o.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+		o.frequency.exponentialRampToValueAtTime(freq * 0.5, this.audioCtx.currentTime + dur);
+		g.gain.setValueAtTime(vol, this.audioCtx.currentTime);
+		g.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + dur);
+		o.connect(g);
+		g.connect(this.masterGain);
+		o.start();
+		o.stop(this.audioCtx.currentTime + dur);
 	}
 
-	private playOvertakeSFX() {
-		this.playSFX(600 + this.comboMultiplier * 100, "sine", 0.08, 0.08);
-	}
-	private playCoinSFX() {
-		this.playSFX(880, "sine", 0.06, 0.06);
-	}
-	private playPowerUpSFX() {
-		this.playSFX(523, "sine", 0.15, 0.1);
-	}
 	private playCrashSFX() {
 		if (!this.audioCtx || !this.masterGain) return;
-		const bufSize = this.audioCtx.sampleRate * 0.3;
-		const buf = this.audioCtx.createBuffer(1, bufSize, this.audioCtx.sampleRate);
+		const bs = this.audioCtx.sampleRate * 0.3;
+		const buf = this.audioCtx.createBuffer(1, bs, this.audioCtx.sampleRate);
 		const d = buf.getChannelData(0);
-		for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / bufSize);
-		const noise = this.audioCtx.createBufferSource();
-		noise.buffer = buf;
-		const gain = this.audioCtx.createGain();
-		gain.gain.setValueAtTime(0.2, this.audioCtx.currentTime);
-		gain.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.3);
-		noise.connect(gain);
-		gain.connect(this.masterGain);
-		noise.start();
-		noise.stop(this.audioCtx.currentTime + 0.3);
+		for (let i = 0; i < bs; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / bs);
+		const n = this.audioCtx.createBufferSource();
+		n.buffer = buf;
+		const g = this.audioCtx.createGain();
+		g.gain.setValueAtTime(0.15, this.audioCtx.currentTime);
+		g.gain.exponentialRampToValueAtTime(0.001, this.audioCtx.currentTime + 0.3);
+		n.connect(g);
+		g.connect(this.masterGain);
+		n.start();
+		n.stop(this.audioCtx.currentTime + 0.3);
 	}
 }

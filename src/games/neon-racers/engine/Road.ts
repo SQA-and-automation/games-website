@@ -1,42 +1,56 @@
-import { ROAD, SCREEN, ZONES } from "../config";
-import type { RoadSegment } from "../types";
+import { ROAD, ZONES } from "../config";
 
-/**
- * Pseudo-3D road using classic scanline projection (OutRun style).
- * Each segment represents a horizontal strip of road at a certain Z distance.
- */
+export interface RoadInfo {
+	curve: number;
+	zone: (typeof ZONES)[number];
+	cycleNum: number;
+	segmentIndex: number;
+	hasTraffic: boolean;
+	trafficOffset: number;
+	trafficType: string;
+	trafficPassed: boolean;
+	hasCoin: boolean;
+	hasPowerUp: boolean;
+	powerUpType: string;
+}
+
 export class Road {
-	segments: RoadSegment[] = [];
+	// Curve data per segment
+	private curves: number[] = [];
+	private totalSegments: number;
+
+	// Traffic & items
+	private traffic: Map<number, { offset: number; type: string; speed: number; passed: boolean }> =
+		new Map();
+	private coins: Set<number> = new Set();
+	private powerUps: Map<number, string> = new Map();
 
 	constructor() {
-		this.generate();
-	}
-
-	private generate() {
 		const totalZoneLength = ZONES.reduce((sum, z) => sum + z.length, 0);
-		const totalSegments = totalZoneLength * 3;
+		this.totalSegments = totalZoneLength * 3;
 
-		for (let i = 0; i < totalSegments; i++) {
-			this.segments.push({
-				index: i,
-				p1: { x: 0, y: 0, w: 0 },
-				p2: { x: 0, y: 0, w: 0 },
-				curve: this.generateCurve(i),
-				y: 0,
-				clip: 0,
-			});
+		for (let i = 0; i < this.totalSegments; i++) {
+			const t = i * 0.008;
+			this.curves.push(
+				Math.sin(t * 1.3) * 0.4 + Math.sin(t * 0.7) * 0.25 + Math.sin(t * 3.1) * 0.1,
+			);
 		}
 	}
 
-	private generateCurve(index: number): number {
-		const t = index * 0.008;
-		return Math.sin(t * 1.3) * 3 + Math.sin(t * 0.7) * 2 + Math.sin(t * 3.1) * 1;
+	get length() {
+		return this.totalSegments;
 	}
 
-	getZone(segmentIndex: number) {
+	getCurve(segIndex: number): number {
+		return (
+			this.curves[((segIndex % this.totalSegments) + this.totalSegments) % this.totalSegments] ?? 0
+		);
+	}
+
+	getZone(segIndex: number) {
 		const cycleLength = ZONES.reduce((sum, z) => sum + z.length, 0);
-		const posInCycle = ((segmentIndex % cycleLength) + cycleLength) % cycleLength;
-		const cycleNum = Math.floor(segmentIndex / cycleLength);
+		const posInCycle = ((segIndex % cycleLength) + cycleLength) % cycleLength;
+		const cycleNum = Math.floor(Math.max(0, segIndex) / cycleLength);
 
 		let accumulated = 0;
 		for (const zone of ZONES) {
@@ -48,66 +62,53 @@ export class Road {
 		return { zone: ZONES[0], cycleNum };
 	}
 
-	getSegment(index: number): RoadSegment | undefined {
-		if (index < 0) return undefined;
-		return this.segments[index % this.segments.length];
+	// Traffic management
+	setTraffic(seg: number, offset: number, type: string, speed: number) {
+		this.traffic.set(seg, { offset, type, speed, passed: false });
 	}
 
-	get length() {
-		return this.segments.length;
+	getTraffic(seg: number) {
+		return this.traffic.get(seg);
 	}
 
-	/**
-	 * Project road segments to screen coordinates.
-	 * Classic pseudo-3D: each segment gets a screen Y, X, and width based on perspective.
-	 */
-	project(position: number, playerX: number) {
-		const baseIndex = Math.max(0, Math.floor(position));
-		const camHeight = 1500;
-		const fov = 100;
-		const cameraDepth = 1 / Math.tan(((fov / 2) * Math.PI) / 180);
+	removeTraffic(seg: number) {
+		this.traffic.delete(seg);
+	}
 
-		let curveAccum = 0;
-		let prevScreenY: number = SCREEN.HEIGHT;
+	markPassed(seg: number) {
+		const t = this.traffic.get(seg);
+		if (t) t.passed = true;
+	}
 
-		for (let n = 1; n <= ROAD.VISIBLE_SEGMENTS; n++) {
-			const segIndex = (baseIndex + n) % this.segments.length;
-			const seg = this.segments[segIndex];
-			if (!seg) continue;
+	// Coins
+	setCoin(seg: number) {
+		this.coins.add(seg);
+	}
 
-			// Z distance from camera (in segment units)
-			const z = (n - (position - baseIndex)) * ROAD.SEGMENT_LENGTH;
-			if (z <= 0) continue;
+	hasCoin(seg: number) {
+		return this.coins.has(seg);
+	}
 
-			// Perspective projection
-			const scale = cameraDepth / z;
+	removeCoin(seg: number) {
+		this.coins.delete(seg);
+	}
 
-			// Screen Y: above center = further away
-			const screenY = SCREEN.HEIGHT * 0.6 - scale * camHeight * SCREEN.HEIGHT;
+	// Power-ups
+	setPowerUp(seg: number, type: string) {
+		this.powerUps.set(seg, type);
+	}
 
-			// Road width at this distance
-			const screenW = scale * ROAD.WIDTH * SCREEN.WIDTH * 0.5;
+	getPowerUp(seg: number) {
+		return this.powerUps.get(seg);
+	}
 
-			// Horizontal offset from curves
-			curveAccum += seg.curve * scale * 2;
-			const screenX = SCREEN.WIDTH / 2 - playerX * screenW * 0.5 + curveAccum;
+	removePowerUp(seg: number) {
+		this.powerUps.delete(seg);
+	}
 
-			seg.p2 = { x: screenX, y: screenY, w: screenW };
-
-			// p1 = previous segment's p2 (or screen bottom for first segment)
-			if (n === 1) {
-				seg.p1 = { x: SCREEN.WIDTH / 2, y: SCREEN.HEIGHT, w: screenW * 2.5 };
-			}
-
-			// Set p1 of next iteration
-			const nextSegIndex = (baseIndex + n + 1) % this.segments.length;
-			const nextSeg = this.segments[nextSegIndex];
-			if (nextSeg) {
-				nextSeg.p1 = { x: screenX, y: screenY, w: screenW };
-			}
-
-			seg.clip = prevScreenY;
-			prevScreenY = Math.min(prevScreenY, screenY);
-		}
+	clearItems() {
+		this.traffic.clear();
+		this.coins.clear();
+		this.powerUps.clear();
 	}
 }
