@@ -13,6 +13,9 @@ export class AudioEngine {
 	private arpInterval: ReturnType<typeof setInterval> | null = null;
 	private beatInterval: ReturnType<typeof setInterval> | null = null;
 	private intensity = 0.5;
+	private isBossFight = false;
+	private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+	private isNearDeath = false;
 
 	get muted() {
 		return this._muted;
@@ -246,10 +249,62 @@ export class AudioEngine {
 		};
 	}
 
+	playComboKill(combo: number) {
+		if (!this.ctx || !this.sfxGain || combo <= 1) return;
+		const osc = this.ctx.createOscillator();
+		const gain = this.ctx.createGain();
+		osc.type = "sine";
+		// Pitch rises with combo
+		const baseFreq = 600 + combo * 150;
+		osc.frequency.setValueAtTime(baseFreq, this.ctx.currentTime);
+		osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, this.ctx.currentTime + 0.1);
+		gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+		gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+		osc.connect(gain);
+		gain.connect(this.sfxGain);
+		osc.start();
+		osc.stop(this.ctx.currentTime + 0.1);
+	}
+
+	setNearDeath(nearDeath: boolean) {
+		if (nearDeath === this.isNearDeath) return;
+		this.isNearDeath = nearDeath;
+
+		if (nearDeath && this.ctx && this.sfxGain) {
+			this.heartbeatInterval = setInterval(() => {
+				if (!this.ctx || !this.sfxGain || !this.isNearDeath) return;
+				// Double-beat heartbeat
+				for (const delay of [0, 0.15]) {
+					const osc = this.ctx.createOscillator();
+					const gain = this.ctx.createGain();
+					osc.type = "sine";
+					osc.frequency.value = 50;
+					const t = this.ctx.currentTime + delay;
+					gain.gain.setValueAtTime(0.12, t);
+					gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+					osc.connect(gain);
+					gain.connect(this.sfxGain);
+					osc.start(t);
+					osc.stop(t + 0.12);
+				}
+			}, 800);
+		} else if (this.heartbeatInterval) {
+			clearInterval(this.heartbeatInterval);
+			this.heartbeatInterval = null;
+		}
+	}
+
 	// === MUSIC ===
 
-	setIntensity(level: number) {
+	setIntensity(level: number, isBoss = false) {
 		this.intensity = Math.max(0, Math.min(1, level));
+		// Dynamic boss music shift
+		if (isBoss !== this.isBossFight) {
+			this.isBossFight = isBoss;
+			if (this.bassGain) {
+				this.bassGain.gain.value = isBoss ? 0.25 : 0.15;
+			}
+		}
 	}
 
 	startMusic() {
@@ -360,6 +415,7 @@ export class AudioEngine {
 
 	destroy() {
 		this.stopMusic();
+		this.setNearDeath(false);
 		this.ctx?.close();
 		this.ctx = null;
 		this.initialized = false;

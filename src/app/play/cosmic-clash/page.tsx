@@ -25,6 +25,7 @@ export default function CosmicClashPage() {
 		enemiesKilled: 0,
 		timePlayed: 0,
 		powerUpsCollected: 0,
+		combo: 1,
 	});
 	const [activePowerUps, setActivePowerUps] = useState<ActivePowerUp[]>([]);
 	const [lives, setLives] = useState(3);
@@ -33,23 +34,37 @@ export default function CosmicClashPage() {
 	const [muted, setMuted] = useState(false);
 	const [isNewHighScore, setIsNewHighScore] = useState(false);
 	const [highScore, setHighScore] = useState(0);
+	const [onboarding, setOnboarding] = useState<string | null>(null);
+	const [displayScore, setDisplayScore] = useState(0);
+	const [gameOverVisible, setGameOverVisible] = useState(false);
 
 	const initGame = useCallback(async () => {
 		if (!canvasRef.current) return;
 
-		// Dynamic import to avoid SSR issues with canvas/audio
 		const { Game } = await import("@/games/cosmic-clash/engine/Game");
 
 		const game = new Game(canvasRef.current, {
-			onStateChange: setGameState,
+			onStateChange: (state) => {
+				setGameState(state);
+				if (state === "game-over") {
+					setDisplayScore(0);
+					setGameOverVisible(false);
+					// Staggered reveal
+					setTimeout(() => setGameOverVisible(true), 100);
+				}
+			},
 			onStatsUpdate: setStats,
 			onPowerUpsChange: setActivePowerUps,
 			onLivesChange: (l, h) => {
 				setLives(l);
 				setHp(h);
 			},
-			onBossHPChange: (hp, maxHp) => setBossHp(maxHp > 0 ? { hp, maxHp } : null),
+			onBossHPChange: (currentHp, maxHp) => setBossHp(maxHp > 0 ? { hp: currentHp, maxHp } : null),
 			onNewHighScore: () => setIsNewHighScore(true),
+			onShowOnboarding: (isMobile) => {
+				setOnboarding(isMobile ? "Drag to move your ship" : "Arrow keys or WASD to move");
+				setTimeout(() => setOnboarding(null), 3000);
+			},
 		});
 
 		gameRef.current = game;
@@ -63,8 +78,34 @@ export default function CosmicClashPage() {
 		};
 	}, [initGame]);
 
+	// Score count-up animation on game over
+	useEffect(() => {
+		if (gameState !== "game-over" || stats.score === 0) {
+			setDisplayScore(stats.score);
+			return;
+		}
+		const target = stats.score;
+		const duration = 1500;
+		const start = performance.now();
+		let frameId: number;
+
+		const animate = (now: number) => {
+			const elapsed = now - start;
+			const progress = Math.min(1, elapsed / duration);
+			// Ease out
+			const eased = 1 - (1 - progress) ** 3;
+			setDisplayScore(Math.floor(target * eased));
+			if (progress < 1) {
+				frameId = requestAnimationFrame(animate);
+			}
+		};
+		frameId = requestAnimationFrame(animate);
+		return () => cancelAnimationFrame(frameId);
+	}, [gameState, stats.score]);
+
 	const handleStart = () => {
 		setIsNewHighScore(false);
+		setOnboarding(null);
 		gameRef.current?.start();
 	};
 
@@ -123,7 +164,6 @@ export default function CosmicClashPage() {
 				touchAction: "none",
 			}}
 		>
-			{/* Game Canvas */}
 			<canvas
 				ref={canvasRef}
 				style={{
@@ -281,16 +321,44 @@ export default function CosmicClashPage() {
 						</Box>
 					)}
 
+					{/* Onboarding hint */}
+					{onboarding && (
+						<Box
+							sx={{
+								position: "absolute",
+								bottom: "30%",
+								left: 0,
+								right: 0,
+								textAlign: "center",
+								pointerEvents: "none",
+								animation: "fadeInOut 3s ease-in-out",
+								"@keyframes fadeInOut": {
+									"0%": { opacity: 0 },
+									"15%": { opacity: 1 },
+									"70%": { opacity: 1 },
+									"100%": { opacity: 0 },
+								},
+							}}
+						>
+							<Typography
+								sx={{
+									fontFamily: "var(--font-orbitron)",
+									fontSize: "0.85rem",
+									color: "rgba(255,255,255,0.7)",
+									bgcolor: "rgba(0,0,0,0.4)",
+									display: "inline-block",
+									px: 2,
+									py: 0.5,
+									borderRadius: 1,
+								}}
+							>
+								{onboarding}
+							</Typography>
+						</Box>
+					)}
+
 					{/* Controls */}
-					<Box
-						sx={{
-							position: "absolute",
-							bottom: 12,
-							right: 12,
-							display: "flex",
-							gap: 1,
-						}}
-					>
+					<Box sx={{ position: "absolute", bottom: 12, right: 12, display: "flex", gap: 1 }}>
 						<IconButton
 							onClick={handleMute}
 							size="small"
@@ -405,7 +473,7 @@ export default function CosmicClashPage() {
 							onClick={handleResume}
 							sx={{ color: "#00F0FF", bgcolor: "rgba(0,240,255,0.1)", px: 3, borderRadius: 2 }}
 						>
-							<PlayArrowIcon sx={{ mr: 0.5 }} />{" "}
+							<PlayArrowIcon sx={{ mr: 0.5 }} />
 							<Typography sx={{ fontFamily: "var(--font-orbitron)", fontSize: "0.8rem" }}>
 								Resume
 							</Typography>
@@ -414,7 +482,7 @@ export default function CosmicClashPage() {
 							onClick={handleRestart}
 							sx={{ color: "#FFAA33", bgcolor: "rgba(255,170,51,0.1)", px: 3, borderRadius: 2 }}
 						>
-							<ReplayIcon sx={{ mr: 0.5 }} />{" "}
+							<ReplayIcon sx={{ mr: 0.5 }} />
 							<Typography sx={{ fontFamily: "var(--font-orbitron)", fontSize: "0.8rem" }}>
 								Restart
 							</Typography>
@@ -423,7 +491,7 @@ export default function CosmicClashPage() {
 							onClick={handleHome}
 							sx={{ color: "#9E9E9E", bgcolor: "rgba(255,255,255,0.05)", px: 3, borderRadius: 2 }}
 						>
-							<HomeIcon sx={{ mr: 0.5 }} />{" "}
+							<HomeIcon sx={{ mr: 0.5 }} />
 							<Typography sx={{ fontFamily: "var(--font-orbitron)", fontSize: "0.8rem" }}>
 								Menu
 							</Typography>
@@ -444,6 +512,8 @@ export default function CosmicClashPage() {
 						justifyContent: "center",
 						bgcolor: "rgba(10, 10, 15, 0.9)",
 						gap: 2,
+						opacity: gameOverVisible ? 1 : 0,
+						transition: "opacity 0.5s ease",
 					}}
 				>
 					<Typography
@@ -452,6 +522,11 @@ export default function CosmicClashPage() {
 							fontFamily: "var(--font-orbitron)",
 							color: "#FF3131",
 							fontWeight: 700,
+							animation: "slideDown 0.5s ease-out",
+							"@keyframes slideDown": {
+								from: { transform: "translateY(-30px)", opacity: 0 },
+								to: { transform: "translateY(0)", opacity: 1 },
+							},
 						}}
 					>
 						GAME OVER
@@ -464,10 +539,18 @@ export default function CosmicClashPage() {
 								color: "#FFD700",
 								fontSize: "1rem",
 								fontWeight: 700,
-								animation: "pulse 1s ease-in-out infinite",
-								"@keyframes pulse": {
-									"0%, 100%": { opacity: 0.7, transform: "scale(1)" },
-									"50%": { opacity: 1, transform: "scale(1.1)" },
+								animation: "newHighScore 1s ease-in-out infinite",
+								"@keyframes newHighScore": {
+									"0%, 100%": {
+										opacity: 0.7,
+										transform: "scale(1)",
+										textShadow: "0 0 10px rgba(255,215,0,0.3)",
+									},
+									"50%": {
+										opacity: 1,
+										transform: "scale(1.1)",
+										textShadow: "0 0 25px rgba(255,215,0,0.8)",
+									},
 								},
 							}}
 						>
@@ -483,10 +566,9 @@ export default function CosmicClashPage() {
 							fontWeight: 900,
 						}}
 					>
-						{stats.score.toLocaleString()}
+						{displayScore.toLocaleString()}
 					</Typography>
 
-					{/* Stats grid */}
 					<Box
 						sx={{
 							display: "grid",
@@ -497,6 +579,11 @@ export default function CosmicClashPage() {
 							borderRadius: 2,
 							p: 2,
 							border: "1px solid rgba(255,255,255,0.06)",
+							animation: "fadeUp 0.6s ease-out 0.3s both",
+							"@keyframes fadeUp": {
+								from: { transform: "translateY(20px)", opacity: 0 },
+								to: { transform: "translateY(0)", opacity: 1 },
+							},
 						}}
 					>
 						{[
@@ -525,12 +612,23 @@ export default function CosmicClashPage() {
 						))}
 					</Box>
 
-					<Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+					<Box
+						sx={{
+							display: "flex",
+							gap: 2,
+							mt: 2,
+							animation: "fadeUp 0.6s ease-out 0.6s both",
+							"@keyframes fadeUp": {
+								from: { transform: "translateY(20px)", opacity: 0 },
+								to: { transform: "translateY(0)", opacity: 1 },
+							},
+						}}
+					>
 						<IconButton
 							onClick={handleRestart}
 							sx={{ color: "#00F0FF", bgcolor: "rgba(0,240,255,0.1)", px: 3, borderRadius: 2 }}
 						>
-							<ReplayIcon sx={{ mr: 0.5 }} />{" "}
+							<ReplayIcon sx={{ mr: 0.5 }} />
 							<Typography sx={{ fontFamily: "var(--font-orbitron)", fontSize: "0.8rem" }}>
 								Retry
 							</Typography>
@@ -539,7 +637,7 @@ export default function CosmicClashPage() {
 							onClick={handleHome}
 							sx={{ color: "#9E9E9E", bgcolor: "rgba(255,255,255,0.05)", px: 3, borderRadius: 2 }}
 						>
-							<HomeIcon sx={{ mr: 0.5 }} />{" "}
+							<HomeIcon sx={{ mr: 0.5 }} />
 							<Typography sx={{ fontFamily: "var(--font-orbitron)", fontSize: "0.8rem" }}>
 								Home
 							</Typography>

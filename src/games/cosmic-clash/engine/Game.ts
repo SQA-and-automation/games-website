@@ -1,11 +1,21 @@
 import { AudioEngine } from "../audio/AudioEngine";
-import { BOSS as BOSS_CFG, CANVAS, ENEMIES, PARTICLES, PLAYER, POWERUPS } from "../config";
+import {
+	BOSS as BOSS_CFG,
+	CANVAS,
+	COLORS,
+	ENEMIES,
+	JUICE,
+	PARTICLES,
+	PLAYER,
+	POWERUPS,
+} from "../config";
 import { Boss } from "../entities/Boss";
 import { Bullet } from "../entities/Bullet";
 import { Enemy } from "../entities/Enemy";
-import { createExplosion, type Particle } from "../entities/Particle";
+import { createBulletTrail, createExplosion, type Particle } from "../entities/Particle";
 import { Player } from "../entities/Player";
 import { PowerUpItem, rollEpicPowerUp, rollPowerUpType } from "../entities/PowerUp";
+import { ScorePopup } from "../entities/ScorePopup";
 import { ScreenEffects } from "../renderer/Effects";
 import { StarFieldRenderer } from "../renderer/StarField";
 import { PowerUpSystem } from "../systems/PowerUpSystem";
@@ -33,6 +43,7 @@ export class Game {
 	private bullets: Bullet[] = [];
 	private powerUpItems: PowerUpItem[] = [];
 	private particles: Particle[] = [];
+	private scorePopups: ScorePopup[] = [];
 
 	// Drone companions
 	private droneAngle = 0;
@@ -43,6 +54,23 @@ export class Game {
 	private lastTime = 0;
 	private waveTextTimer = 0;
 	private waveTextContent = "";
+
+	// Juice: hit freeze
+	private freezeFrames = 0;
+
+	// Juice: death slow-mo
+	private deathSlowmo = 0;
+	private deathSlowmoFactor = 1;
+
+	// Juice: bullet trail counter
+	private trailCounter = 0;
+
+	// Boss spawn timer (replaces setTimeout)
+	private bossSpawnTimer = -1;
+
+	// Onboarding
+	private hasShownOnboarding = false;
+	private onboardingTimer = 0;
 
 	constructor(canvas: HTMLCanvasElement, callbacks: GameCallbacks) {
 		this.canvas = canvas;
@@ -73,6 +101,22 @@ export class Game {
 		this.audio.startMusic();
 		this.lastTime = performance.now();
 		this.animFrameId = requestAnimationFrame(this.loop);
+
+		// Onboarding: show hints on first play
+		if (!this.hasShownOnboarding) {
+			const seenKey = "cosmicClash_onboarded";
+			try {
+				if (!localStorage.getItem(seenKey)) {
+					const isMobile = "ontouchstart" in window;
+					this.callbacks.onShowOnboarding(isMobile);
+					this.onboardingTimer = 3000;
+					localStorage.setItem(seenKey, "1");
+				}
+			} catch {
+				// localStorage unavailable
+			}
+			this.hasShownOnboarding = true;
+		}
 	}
 
 	private reset() {
@@ -82,11 +126,17 @@ export class Game {
 		this.bullets = [];
 		this.powerUpItems = [];
 		this.particles = [];
+		this.scorePopups = [];
 		this.waveSystem.reset();
 		this.powerUpSystem.reset();
 		this.scoreSystem.reset();
 		this.droneAngle = 0;
 		this.laserStopFn = null;
+		this.freezeFrames = 0;
+		this.deathSlowmo = 0;
+		this.deathSlowmoFactor = 1;
+		this.trailCounter = 0;
+		this.bossSpawnTimer = -1;
 
 		this.waveSystem.startNextWave();
 		this.showWaveText(`Wave ${this.waveSystem.wave}`);
@@ -137,11 +187,30 @@ export class Game {
 	private loop(timestamp: number) {
 		if (this.state !== "playing") return;
 
-		const rawDt = Math.min((timestamp - this.lastTime) / 16.67, 3); // cap at ~3 frames
+		const rawDt = Math.min((timestamp - this.lastTime) / 16.67, 3);
 		this.lastTime = timestamp;
-		const slowFactor = this.powerUpSystem.slowFactor;
 
-		this.update(rawDt, slowFactor);
+		// Hit freeze: skip update for a few frames
+		if (this.freezeFrames > 0) {
+			this.freezeFrames--;
+			this.draw();
+			this.animFrameId = requestAnimationFrame(this.loop);
+			return;
+		}
+
+		// Death slow-mo
+		let dtMod = rawDt;
+		if (this.deathSlowmo > 0) {
+			this.deathSlowmo -= rawDt * 16.67;
+			dtMod = rawDt * JUICE.DEATH_SLOWMO_FACTOR;
+			if (this.deathSlowmo <= 0) {
+				this.deathSlowmoFactor = 1;
+			}
+		}
+
+		const slowFactor = this.powerUpSystem.slowFactor * this.deathSlowmoFactor;
+
+		this.update(dtMod, slowFactor);
 		this.draw();
 
 		this.animFrameId = requestAnimationFrame(this.loop);
@@ -152,7 +221,13 @@ export class Game {
 
 		// Star field always moves
 		this.starField.update(dt);
+		this.starField.setWaveProgress(this.waveSystem.wave);
 		this.effects.update(dt);
+
+		// Onboarding timer
+		if (this.onboardingTimer > 0) {
+			this.onboardingTimer -= dt * 16.67;
+		}
 
 		// Wave text timer
 		if (this.waveTextTimer > 0) {
@@ -162,6 +237,13 @@ export class Game {
 		// Particles always update
 		for (const p of this.particles) p.update(dt);
 		this.particles = this.particles.filter((p) => p.alive);
+
+		// Score popups
+		for (const sp of this.scorePopups) sp.update(dt);
+		this.scorePopups = this.scorePopups.filter((sp) => sp.alive);
+
+		// Combo timer
+		this.scoreSystem.updateCombo(dt);
 
 		// Player
 		this.player.speedMultiplier = this.powerUpSystem.hasSpeedBoost
@@ -178,7 +260,6 @@ export class Game {
 		// Drone companions
 		if (this.powerUpSystem.hasDrones) {
 			this.droneAngle += 0.04 * dt;
-			// Drones also fire
 			if (this.player.canFire(now - PLAYER.FIRE_RATE * 0.3)) {
 				this.fireDroneBullets();
 			}
@@ -196,22 +277,38 @@ export class Game {
 		this.powerUpSystem.update(dt);
 		this.callbacks.onPowerUpsChange([...this.powerUpSystem.active]);
 
-		// Music intensity based on wave
-		this.audio.setIntensity(Math.min(1, 0.3 + this.waveSystem.wave * 0.05));
+		// Music intensity based on wave + boss
+		const isBoss = this.boss !== null && !this.boss.entering;
+		this.audio.setIntensity(Math.min(1, 0.3 + this.waveSystem.wave * 0.05), isBoss);
+
+		// Near-death heartbeat
+		this.audio.setNearDeath(this.player.lives <= 1 && this.player.hp <= 1);
 
 		// Wave spawning
 		const newEnemy = this.waveSystem.update(dt);
 		if (newEnemy) this.enemies.push(newEnemy);
 
-		// Boss wave
-		if (this.waveSystem.isBossWave && !this.waveSystem.bossSpawned && !this.boss) {
-			this.effects.startBossWarning();
-			setTimeout(() => {
+		// Boss spawn timer (replaces setTimeout)
+		if (this.bossSpawnTimer > 0) {
+			this.bossSpawnTimer -= dt * 16.67;
+			if (this.bossSpawnTimer <= 0) {
 				this.boss = new Boss(this.waveSystem.wave);
 				this.waveSystem.bossSpawned = true;
 				this.callbacks.onBossHPChange(this.boss.hp, this.boss.maxHp);
-			}, 2000);
-			this.waveSystem.bossSpawned = true; // prevent re-trigger
+				this.bossSpawnTimer = -1;
+			}
+		}
+
+		// Boss wave trigger
+		if (
+			this.waveSystem.isBossWave &&
+			!this.waveSystem.bossSpawned &&
+			!this.boss &&
+			this.bossSpawnTimer < 0
+		) {
+			this.effects.startBossWarning();
+			this.bossSpawnTimer = 2000;
+			this.waveSystem.bossSpawned = true; // prevent re-trigger (actual spawn after timer)
 		}
 
 		// Update enemies
@@ -262,9 +359,20 @@ export class Game {
 			}
 		}
 
-		// Update bullets
+		// Update bullets + spawn trails
+		this.trailCounter++;
 		for (const b of this.bullets) {
 			b.update(dt, b.isPlayerBullet ? 1 : slowFactor);
+
+			// Bullet trails for player bullets
+			if (
+				b.isPlayerBullet &&
+				!b.isLaser &&
+				b.alive &&
+				this.trailCounter % JUICE.TRAIL_SPAWN_INTERVAL === 0
+			) {
+				this.particles.push(createBulletTrail(b.x, b.y, COLORS.PLAYER_BULLET));
+			}
 		}
 		this.bullets = this.bullets.filter((b) => b.alive);
 
@@ -325,7 +433,7 @@ export class Game {
 				}
 			}
 
-			// Enemy body vs player (kamikaze etc.)
+			// Enemy body vs player
 			for (const enemy of this.enemies) {
 				if (!enemy.alive) continue;
 				if (rectsOverlap(enemy.rect, playerHitbox)) {
@@ -412,16 +520,13 @@ export class Game {
 	}
 
 	private updateLaser() {
-		// Laser is a continuous beam — we check collision differently
 		const laserX = this.player.centerX;
-		const laserTop = 0;
-		const laserBottom = this.player.y;
 		const laserWidth = POWERUPS.TYPES.LASER_BEAM.width;
 		const laserRect = {
 			x: laserX - laserWidth / 2,
-			y: laserTop,
+			y: 0,
 			width: laserWidth,
-			height: laserBottom,
+			height: this.player.y,
 		};
 		const dmg = POWERUPS.TYPES.LASER_BEAM.damage;
 
@@ -440,7 +545,6 @@ export class Game {
 
 	private fireEnemyBullet(enemy: Enemy) {
 		const speed = 3;
-
 		if (enemy.type === "TANK") {
 			const spread = ENEMIES.TANK.spreadAngle;
 			for (const angle of [-spread, 0, spread]) {
@@ -458,19 +562,16 @@ export class Game {
 		} else {
 			this.bullets.push(new Bullet(enemy.centerX, enemy.y + enemy.height, 0, speed, 1, false));
 		}
-
 		this.audio.playEnemyShoot();
 	}
 
 	private fireBossBullets() {
 		if (!this.boss) return;
-
 		const cx = this.boss.centerX;
 		const bottom = this.boss.y + this.boss.height;
 		const speed = 4;
 
 		if (this.boss.phase === 3) {
-			// Enrage: spiral pattern
 			for (let i = 0; i < 8; i++) {
 				const angle = (Math.PI * 2 * i) / 8 + this.boss.age * 0.1;
 				this.bullets.push(
@@ -478,10 +579,8 @@ export class Game {
 				);
 			}
 		} else if (this.boss.phase === 2) {
-			// Aimed spread
 			const dx = this.player.centerX - cx;
 			const dy = this.player.centerY - bottom;
-			const _dist = Math.sqrt(dx * dx + dy * dy);
 			const baseAngle = Math.atan2(dy, dx);
 			for (const offset of [-0.2, -0.1, 0, 0.1, 0.2]) {
 				const angle = baseAngle + offset;
@@ -490,12 +589,10 @@ export class Game {
 				);
 			}
 		} else {
-			// Phase 1: simple spread
 			for (const vx of [-2, -1, 0, 1, 2]) {
 				this.bullets.push(new Bullet(cx, bottom, vx, speed, 1, false));
 			}
 		}
-
 		this.audio.playEnemyShoot();
 	}
 
@@ -509,8 +606,13 @@ export class Game {
 	// === EVENTS ===
 
 	private onEnemyKilled(enemy: Enemy) {
-		this.scoreSystem.addScore(enemy.score);
 		this.scoreSystem.addKill();
+		const totalPoints = this.scoreSystem.addScore(enemy.score);
+
+		// Score popup
+		this.scorePopups.push(
+			new ScorePopup(enemy.centerX, enemy.centerY, totalPoints, this.scoreSystem.comboMultiplier),
+		);
 
 		this.particles.push(
 			...createExplosion(
@@ -524,7 +626,11 @@ export class Game {
 		);
 
 		this.audio.playExplosion();
+		this.audio.playComboKill(this.scoreSystem.comboMultiplier);
 		this.effects.shake(3);
+
+		// Hit freeze
+		this.freezeFrames = JUICE.HIT_FREEZE_FRAMES;
 
 		// Power-up drop
 		if (Math.random() < POWERUPS.DROP_CHANCE) {
@@ -536,14 +642,23 @@ export class Game {
 	private onBossKilled() {
 		if (!this.boss) return;
 
-		this.scoreSystem.addScore(this.boss.score);
 		this.scoreSystem.addKill();
+		const totalPoints = this.scoreSystem.addScore(this.boss.score);
+		this.scorePopups.push(
+			new ScorePopup(
+				this.boss.centerX,
+				this.boss.centerY,
+				totalPoints,
+				this.scoreSystem.comboMultiplier,
+			),
+		);
 
 		this.particles.push(...createExplosion(this.boss.centerX, this.boss.centerY, 30, 5, 800, 5));
 
 		this.audio.playExplosion(true);
 		this.effects.shake(10);
 		this.effects.flash("#FFFFFF", 0.5);
+		this.freezeFrames = JUICE.HIT_FREEZE_FRAMES * 3;
 
 		// Guaranteed Epic drop
 		const { type, rarity } = rollEpicPowerUp();
@@ -552,7 +667,6 @@ export class Game {
 		this.boss = null;
 		this.callbacks.onBossHPChange(0, 0);
 
-		// Continue to next wave
 		this.waveSystem.startBetweenWaves();
 		this.showWaveText(`Wave ${this.waveSystem.wave + 1}`);
 	}
@@ -574,7 +688,24 @@ export class Game {
 		this.callbacks.onLivesChange(this.player.lives, this.player.hp);
 
 		if (!this.player.alive) {
-			this.onGameOver();
+			// Death animation: dramatic explosion + slow-mo
+			this.particles.push(
+				...createExplosion(this.player.centerX, this.player.centerY, 25, 4, 1000, 4),
+			);
+			this.deathSlowmo = JUICE.DEATH_SLOWMO_DURATION;
+			this.deathSlowmoFactor = JUICE.DEATH_SLOWMO_FACTOR;
+			this.effects.flash("#FF3131", 0.5);
+			this.effects.shake(12);
+
+			// Delay game over until slow-mo finishes
+			const checkGameOver = () => {
+				if (this.deathSlowmo <= 0) {
+					this.onGameOver();
+				} else {
+					requestAnimationFrame(checkGameOver);
+				}
+			};
+			requestAnimationFrame(checkGameOver);
 		}
 	}
 
@@ -583,7 +714,6 @@ export class Game {
 		this.scoreSystem.addPowerUp();
 		this.audio.playPowerUp();
 
-		// Bomb: clear screen
 		if (item.type === "BOMB") {
 			for (const enemy of this.enemies) {
 				this.particles.push(...createExplosion(enemy.centerX, enemy.centerY, 6, 2, 400, 2));
@@ -592,22 +722,16 @@ export class Game {
 			}
 			this.enemies = [];
 			this.bullets = this.bullets.filter((b) => b.isPlayerBullet);
-
-			if (this.boss?.alive) {
-				this.boss.takeDamage(10);
-			}
-
+			if (this.boss?.alive) this.boss.takeDamage(10);
 			this.audio.playBomb();
 			this.effects.flash("#FFFFFF", 0.7);
 			this.effects.shake(8);
 		}
 
-		// Shield
 		if (item.type === "SHIELD") {
 			this.player.shieldHits = POWERUPS.TYPES.SHIELD.hits;
 		}
 
-		// Laser sound
 		if (item.type === "LASER_BEAM") {
 			this.laserStopFn = this.audio.playLaser() ?? null;
 		}
@@ -656,8 +780,11 @@ export class Game {
 		// Power-up items
 		for (const p of this.powerUpItems) p.draw(ctx);
 
-		// Enemies
-		for (const e of this.enemies) e.draw(ctx);
+		// Enemies with glow
+		for (const e of this.enemies) {
+			this.drawEntityGlow(ctx, e.centerX, e.centerY, e.width, e.getColor());
+			e.draw(ctx);
+		}
 
 		// Boss
 		this.boss?.draw(ctx);
@@ -678,7 +805,10 @@ export class Game {
 		// Particles
 		for (const p of this.particles) p.draw(ctx);
 
-		// Screen effects (flash, warning)
+		// Score popups
+		for (const sp of this.scorePopups) sp.draw(ctx);
+
+		// Screen effects
 		this.effects.draw(ctx);
 
 		// Wave text
@@ -696,7 +826,40 @@ export class Game {
 			ctx.globalAlpha = 1;
 		}
 
+		// Combo indicator
+		if (this.scoreSystem.comboMultiplier > 1) {
+			ctx.globalAlpha = 0.8;
+			ctx.font = "bold 16px Orbitron, monospace";
+			ctx.textAlign = "right";
+			ctx.textBaseline = "top";
+			const comboColor =
+				this.scoreSystem.comboMultiplier >= 4
+					? "#FFD700"
+					: this.scoreSystem.comboMultiplier >= 3
+						? "#FF00E5"
+						: "#00F0FF";
+			ctx.fillStyle = comboColor;
+			ctx.shadowColor = comboColor;
+			ctx.shadowBlur = 8;
+			ctx.fillText(`COMBO x${this.scoreSystem.comboMultiplier}`, CANVAS.WIDTH - 10, 50);
+			ctx.shadowBlur = 0;
+			ctx.globalAlpha = 1;
+		}
+
 		ctx.restore();
+	}
+
+	private drawEntityGlow(
+		ctx: CanvasRenderingContext2D,
+		x: number,
+		y: number,
+		size: number,
+		color: string,
+	) {
+		ctx.beginPath();
+		ctx.arc(x, y, size * 0.7, 0, Math.PI * 2);
+		ctx.fillStyle = `${color}10`;
+		ctx.fill();
 	}
 
 	private drawDrones(ctx: CanvasRenderingContext2D) {

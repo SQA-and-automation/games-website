@@ -40,6 +40,7 @@ export interface GameStats {
 	enemiesKilled: number;
 	timePlayed: number;
 	powerUpsCollected: number;
+	combo: number;
 }
 
 export interface SavedData {
@@ -56,4 +57,5 @@ export interface GameCallbacks {
 	onLivesChange: (lives: number, hp: number) => void;
 	onBossHPChange: (hp: number, maxHp: number) => void;
 	onNewHighScore: () => void;
+	onShowOnboarding: (isMobile: boolean) => void;
 }

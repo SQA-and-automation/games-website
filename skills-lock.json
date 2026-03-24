@@ -1,65 +1,175 @@
 {
-	"version": 1,
-	"skills": {
-		"agent-browser": {
-			"source": "vercel-labs/agent-browser",
-			"sourceType": "github",
-			"computedHash": "939c70dd51a234b3ebefc935a06a24f2a6558e7a1be1dfdf72cd372aee8b88f0"
-		},
-		"algorithmic-art": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"computedHash": "5c2804e8f0d4944c7ce6939a2e4afdcf0cb69c966a505481ed8b96e20bb32eee"
-		},
-		"animate": {
-			"source": "pbakaus/impeccable",
-			"sourceType": "github",
-			"computedHash": "3ef78de08d30c9d0512d8841b5c629cf7583e8220ffe5c84178e0754606f9468"
-		},
-		"brainstorming": {
-			"source": "obra/superpowers",
-			"sourceType": "github",
-			"computedHash": "efddfd0efbd0e7b5075c5a66ff91a706ac506c88c7b5ddd7fd45a351cb3fe3af"
-		},
-		"canvas-design": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"computedHash": "a2fe47d24b3fd8e52faef731fff099c557e698083cd644b2e5695cc4dd8c7715"
-		},
-		"design-md": {
-			"source": "google-labs-code/stitch-skills",
-			"sourceType": "github",
-			"computedHash": "d3a4c7d2f2715a33662c8b06ffc16035d01965a8b4ed81c2958fb22ae94760f8"
-		},
-		"frontend-design": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
-		},
-		"react:components": {
-			"source": "google-labs-code/stitch-skills",
-			"sourceType": "github",
-			"computedHash": "01a94f035a1c3a1a405f611c0df212433d8973f18bf16e94540875ec58ee7b9b"
-		},
-		"skill-creator": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"computedHash": "b122f4d1e91aa1d83027e050b5b37c3156203ee85458d7b1360bc48167c9e02a"
-		},
-		"ui-ux-pro-max": {
-			"source": "nextlevelbuilder/ui-ux-pro-max-skill",
-			"sourceType": "github",
-			"computedHash": "0a413bf988d06481f69bb81df2070741c3ba12dd9f1be2706d57f259c905992d"
-		},
-		"using-superpowers": {
-			"source": "obra/superpowers",
-			"sourceType": "github",
-			"computedHash": "91a4d2ccb9432dfd4d3654f6ebd97875adab301d3d77f84e590169ba397760e3"
-		},
-		"web-design-guidelines": {
-			"source": "vercel-labs/agent-skills",
-			"sourceType": "github",
-			"computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
-		}
-	}
+  "version": 1,
+  "skills": {
+    "add-3d-assets": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "dd86664f97d5260aa13484f63ba66414d8d38c0ada923df2715c67101454e7cb"
+    },
+    "add-assets": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "5f9546ea597c28d695aa1429a0e19a190e8e43ca84113e6e9acb0e01b87ef32c"
+    },
+    "add-audio": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "8be325ab91f00fd6430ad2a061e0162c716940ef7609a9925b913f8db7554824"
+    },
+    "add-feature": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "4f2bfca00f15f15492886ab3c71722724770d7a3a760858166622cd3dc0bfaea"
+    },
+    "agent-browser": {
+      "source": "vercel-labs/agent-browser",
+      "sourceType": "github",
+      "computedHash": "939c70dd51a234b3ebefc935a06a24f2a6558e7a1be1dfdf72cd372aee8b88f0"
+    },
+    "algorithmic-art": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "5c2804e8f0d4944c7ce6939a2e4afdcf0cb69c966a505481ed8b96e20bb32eee"
+    },
+    "animate": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "computedHash": "3ef78de08d30c9d0512d8841b5c629cf7583e8220ffe5c84178e0754606f9468"
+    },
+    "brainstorming": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "efddfd0efbd0e7b5075c5a66ff91a706ac506c88c7b5ddd7fd45a351cb3fe3af"
+    },
+    "canvas-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "a2fe47d24b3fd8e52faef731fff099c557e698083cd644b2e5695cc4dd8c7715"
+    },
+    "design-game": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "402b58b6a11d13f8bc0922122279aae9b7e2c0791366ebe745cb91aa1d42ed00"
+    },
+    "design-md": {
+      "source": "google-labs-code/stitch-skills",
+      "sourceType": "github",
+      "computedHash": "d3a4c7d2f2715a33662c8b06ffc16035d01965a8b4ed81c2958fb22ae94760f8"
+    },
+    "develop-web-game": {
+      "source": "openai/skills",
+      "sourceType": "github",
+      "computedHash": "ce15d03cc8c299e062c6b6b31a1238264b06c7b23900a58861e53073e1ac9739"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "computedHash": "d31e234f0c90694a670222cdd1dafa853e051d7066beda389f1097c22dadd461"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
+    "game-3d-assets": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "8f41076a32d4d52bed7ec2a23d267e97c763fbbd9fbef2f06973c29ed3a50a33"
+    },
+    "game-architecture": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "319d2befd2e7d11e484450c49244c91999695a4b66282e553e40ecdf1a558d31"
+    },
+    "game-assets": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "3296abec73c2a29d170a6ab4f549b3b31e525f294bb6be0b1c87778100c8241b"
+    },
+    "game-audio": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "6375c20972b4c59831ea21be26136851738f46f7902e1bcbba9e350806dd81b3"
+    },
+    "game-design-theory": {
+      "source": "pluginagentmarketplace/custom-plugin-game-developer",
+      "sourceType": "github",
+      "computedHash": "e87a16b82d8379b1389c94b15b16d2f52a611338467291aeeec4f72a73a7fd96"
+    },
+    "game-designer": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "051d3e1e033f0beffeaef7a82af944d23102ef82fc6606aca4064f1100be95b7"
+    },
+    "game-development": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "42413e7a7c399f5343fa0874108495c9f5d5274335ae6061f29d012e65dfba3b"
+    },
+    "game-qa": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "afcc914a5e307f4058917097c65d7cb1bde160a5b27b76cda9cd07594f758045"
+    },
+    "improve-game": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "ed91c9a70920450795be1937599016e8b7e133df80c6b1c3408184d489dd88f2"
+    },
+    "make-game": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "6efa7a9fe8351657efa6545cc0a8dc3102893ea3ae77370de5cc6ef70a469ea3"
+    },
+    "meshyai": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "85bb85266c42205ec4f2dcde4ce85f854a699430ae22fb3529144857f32c4d0e"
+    },
+    "phaser-gamedev": {
+      "source": "chongdashu/phaserjs-tinyswords",
+      "sourceType": "github",
+      "computedHash": "784c91cd1cd227a46500435d24a5e7dd157c2cc61ff37e4683ebdc0a6ed21b1a"
+    },
+    "qa-game": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "5d841e56b396a843c5237f9494e1b981bfbfd8b5bbdb41350adebc00303d9423"
+    },
+    "react:components": {
+      "source": "google-labs-code/stitch-skills",
+      "sourceType": "github",
+      "computedHash": "01a94f035a1c3a1a405f611c0df212433d8973f18bf16e94540875ec58ee7b9b"
+    },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "b122f4d1e91aa1d83027e050b5b37c3156203ee85458d7b1360bc48167c9e02a"
+    },
+    "threejs-game": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "3b541b7f11038235ef0ebe36d318faedc4d264dc94bd31d2ba99cfd80dcf8bd8"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "computedHash": "0a413bf988d06481f69bb81df2070741c3ba12dd9f1be2706d57f259c905992d"
+    },
+    "using-superpowers": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "91a4d2ccb9432dfd4d3654f6ebd97875adab301d3d77f84e590169ba397760e3"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
+    },
+    "worldlabs": {
+      "source": "OpusGameLabs/game-creator",
+      "sourceType": "github",
+      "computedHash": "48be2abcffa851e4923c0f9552865a04d71813b0ac3da21f279b9fed76b7dc35"
+    }
+  }
 }

@@ -132,6 +132,27 @@ export const STAR_FIELD = {
 	],
 } as const;
 
+export const COMBO = {
+	TIMEOUT: 2000, // ms before combo resets
+	MULTIPLIER_THRESHOLDS: [0, 3, 8, 15, 25], // kills needed for x1, x2, x3, x4, x5
+} as const;
+
+export const SCORE_POPUP = {
+	RISE_SPEED: 1.5,
+	LIFE: 800, // ms
+	FONT_SIZE: 14,
+	COMBO_FONT_SIZE: 20,
+} as const;
+
+export const JUICE = {
+	HIT_FREEZE_FRAMES: 3,
+	DEATH_SLOWMO_DURATION: 800, // ms
+	DEATH_SLOWMO_FACTOR: 0.2,
+	TRAIL_SPAWN_INTERVAL: 3, // frames between trail particles
+	NEBULA_COUNT: 4,
+	SHOOTING_STAR_CHANCE: 0.002, // per frame
+} as const;
+
 export const COLORS = {
 	PLAYER: "#00F0FF",
 	PLAYER_BULLET: "#00F0FF",

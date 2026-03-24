@@ -1,3 +1,4 @@
+import { COMBO } from "../config";
 import type { GameStats, SavedData } from "../types";
 
 const STORAGE_KEY = "cosmicClash";
@@ -15,19 +16,51 @@ export class ScoreSystem {
 	powerUpsCollected = 0;
 	startTime = 0;
 
+	// Combo
+	comboKills = 0;
+	comboTimer = 0;
+	comboMultiplier = 1;
+
 	reset() {
 		this.score = 0;
 		this.enemiesKilled = 0;
 		this.powerUpsCollected = 0;
 		this.startTime = Date.now();
+		this.comboKills = 0;
+		this.comboTimer = 0;
+		this.comboMultiplier = 1;
 	}
 
-	addScore(points: number) {
-		this.score += points;
+	addScore(points: number): number {
+		const total = points * this.comboMultiplier;
+		this.score += total;
+		return total;
 	}
 
 	addKill() {
 		this.enemiesKilled++;
+		this.comboKills++;
+		this.comboTimer = COMBO.TIMEOUT;
+
+		// Calculate multiplier from thresholds
+		this.comboMultiplier = 1;
+		for (let i = COMBO.MULTIPLIER_THRESHOLDS.length - 1; i >= 0; i--) {
+			if (this.comboKills >= COMBO.MULTIPLIER_THRESHOLDS[i]) {
+				this.comboMultiplier = i + 1;
+				break;
+			}
+		}
+	}
+
+	updateCombo(dt: number) {
+		if (this.comboTimer > 0) {
+			this.comboTimer -= dt * 16.67;
+			if (this.comboTimer <= 0) {
+				this.comboKills = 0;
+				this.comboMultiplier = 1;
+				this.comboTimer = 0;
+			}
+		}
 	}
 
 	addPowerUp() {
@@ -41,6 +74,7 @@ export class ScoreSystem {
 			enemiesKilled: this.enemiesKilled,
 			timePlayed: Date.now() - this.startTime,
 			powerUpsCollected: this.powerUpsCollected,
+			combo: this.comboMultiplier,
 		};
 	}
 

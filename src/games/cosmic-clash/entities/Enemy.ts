@@ -186,7 +186,7 @@ export class Enemy {
 		ctx.globalAlpha = 1;
 	}
 
-	private getColor(): string {
+	getColor(): string {
 		switch (this.type) {
 			case "DRONE":
 				return "#FF5555";
