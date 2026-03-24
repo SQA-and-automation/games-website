@@ -24,6 +24,7 @@ export const games: Game[] = [
 		releaseYear: 2025,
 		accentColor: "#00F0FF",
 		featured: true,
+		playable: true,
 	},
 	{
 		id: "shadow-quest",
