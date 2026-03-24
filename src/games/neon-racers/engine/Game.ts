@@ -279,7 +279,9 @@ export class Game {
 
 		// Centrifugal force from curves
 		const currentSeg = this.road.getSegment(Math.floor(this.position));
-		this.playerX += currentSeg.curve * PLAYER_CFG.CENTRIFUGAL * (this.speed / this.maxSpeed) * dt;
+		if (currentSeg) {
+			this.playerX += currentSeg.curve * PLAYER_CFG.CENTRIFUGAL * (this.speed / this.maxSpeed) * dt;
+		}
 
 		// Clamp player position
 		this.playerX = Math.max(-1.2, Math.min(1.2, this.playerX));
@@ -349,6 +351,7 @@ export class Game {
 
 		for (let i = spawnStart; i < ahead; i++) {
 			const seg = this.road.getSegment(i);
+			if (!seg) continue;
 
 			// Don't re-spawn on segments that already have stuff
 			if (seg.trafficCar || seg.coin || seg.powerUp) continue;
@@ -387,8 +390,10 @@ export class Game {
 		const isPolice = this.vehicleId === "police";
 
 		for (let i = -2; i <= 2; i++) {
-			const seg = this.road.getSegment(playerSeg + i);
-			if (!seg.trafficCar) continue;
+			const idx = playerSeg + i;
+			if (idx < 0) continue;
+			const seg = this.road.getSegment(idx);
+			if (!seg?.trafficCar) continue;
 
 			const car = seg.trafficCar;
 
@@ -443,7 +448,10 @@ export class Game {
 		const magnetRange = hasMagnet ? POWERUPS_CFG.TYPES.MAGNET.range : 0.3;
 
 		for (let i = -1; i <= 1; i++) {
-			const seg = this.road.getSegment(playerSeg + i);
+			const idx = playerSeg + i;
+			if (idx < 0) continue;
+			const seg = this.road.getSegment(idx);
+			if (!seg) continue;
 
 			// Coins
 			if (seg.coin) {
@@ -592,6 +600,7 @@ export class Game {
 		for (let n = ROAD.VISIBLE_SEGMENTS - 1; n > 0; n--) {
 			const segIndex = (baseIndex + n) % this.road.length;
 			const seg = this.road.getSegment(segIndex);
+			if (!seg) continue;
 
 			if (seg.p2.y >= SCREEN.HEIGHT || seg.p2.w < 2) continue;
 

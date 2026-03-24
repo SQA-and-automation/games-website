@@ -27,6 +27,7 @@ export class RoadRenderer {
 		for (let n = ROAD.VISIBLE_SEGMENTS - 1; n > 0; n--) {
 			const segIndex = (baseIndex + n) % road.length;
 			const seg = road.getSegment(segIndex);
+			if (!seg) continue;
 			const { zone } = road.getZone(segIndex);
 
 			if (seg.p2.y >= maxY) continue;

@@ -53,7 +53,8 @@ export class Road {
 		return { zone: ZONES[0], cycleNum };
 	}
 
-	getSegment(index: number): RoadSegment {
+	getSegment(index: number): RoadSegment | undefined {
+		if (index < 0) return undefined;
 		return this.segments[index % this.segments.length];
 	}
 
@@ -70,7 +71,7 @@ export class Road {
 		cameraHeight: number,
 		cameraDepth: number,
 	) {
-		const baseIndex = Math.floor(position);
+		const baseIndex = Math.max(0, Math.floor(position));
 		const cameraY = cameraHeight;
 		let x = 0;
 		let dx = 0;
