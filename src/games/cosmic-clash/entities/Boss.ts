@@ -1,4 +1,5 @@
 import { BOSS, CANVAS, COLORS } from "../config";
+import { SpriteManager } from "../sprites/SpriteManager";
 import type { Rect } from "../types";
 
 type BossPhase = 1 | 2 | 3;
@@ -130,36 +131,13 @@ export class Boss {
 		ctx.shadowColor = COLORS.BOSS;
 		ctx.shadowBlur = glowIntensity + Math.sin(this.pulsePhase) * 5;
 
-		// Main body — angular menacing shape
-		ctx.beginPath();
-		ctx.moveTo(cx, this.y); // top center
-		ctx.lineTo(this.x + this.width, this.y + this.height * 0.3); // right upper
-		ctx.lineTo(this.x + this.width - 8, this.y + this.height * 0.7); // right lower indent
-		ctx.lineTo(this.x + this.width, this.y + this.height); // right bottom wing
-		ctx.lineTo(cx + 10, this.y + this.height * 0.8); // center right
-		ctx.lineTo(cx, this.y + this.height); // center bottom
-		ctx.lineTo(cx - 10, this.y + this.height * 0.8); // center left
-		ctx.lineTo(this.x, this.y + this.height); // left bottom wing
-		ctx.lineTo(this.x + 8, this.y + this.height * 0.7); // left lower indent
-		ctx.lineTo(this.x, this.y + this.height * 0.3); // left upper
-		ctx.closePath();
-
-		const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
-		gradient.addColorStop(0, COLORS.BOSS);
-		gradient.addColorStop(1, "#660066");
-		ctx.fillStyle = gradient;
-		ctx.fill();
+		// Draw sprite — enraged version in phase 3
+		const sprite = this.phase === 3 ? SpriteManager.bossEnraged : SpriteManager.bossNormal;
+		ctx.drawImage(sprite, cx - sprite.width / 2, cy - sprite.height / 2);
 
 		ctx.shadowBlur = 0;
 
-		// Eye/core
-		const eyeSize = 6 + Math.sin(this.pulsePhase * 2) * 2;
-		ctx.beginPath();
-		ctx.arc(cx, cy - 4, eyeSize, 0, Math.PI * 2);
-		ctx.fillStyle = this.phase === 3 ? "#FF3131" : "#FFFFFF";
-		ctx.fill();
-
-		// Phase 3: enrage visual
+		// Phase 3: enrage ring
 		if (this.phase === 3) {
 			ctx.strokeStyle = "rgba(255, 49, 49, 0.5)";
 			ctx.lineWidth = 2;

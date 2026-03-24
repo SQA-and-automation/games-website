@@ -1,4 +1,5 @@
 import { CANVAS, POWERUPS } from "../config";
+import { SpriteManager } from "../sprites/SpriteManager";
 import type { PowerUpType, Rarity, Rect } from "../types";
 
 export class PowerUpItem {
@@ -65,21 +66,12 @@ export class PowerUpItem {
 		ctx.fillStyle = `${color}20`;
 		ctx.fill();
 
-		// Outer ring
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-		ctx.fillStyle = `${color}40`;
-		ctx.fill();
-		ctx.strokeStyle = color;
-		ctx.lineWidth = 2;
-		ctx.stroke();
-
-		// Icon
-		ctx.fillStyle = color;
-		ctx.font = `bold ${Math.floor(r)}px monospace`;
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.fillText(this.getIcon(), this.x, this.y);
+		// Draw sprite
+		const sprite = SpriteManager.getPowerUp(this.type);
+		const scale = pulse;
+		const sw = sprite.width * scale;
+		const sh = sprite.height * scale;
+		ctx.drawImage(sprite, this.x - sw / 2, this.y - sh / 2, sw, sh);
 
 		// Epic sparkle
 		if (this.rarity === "EPIC") {
@@ -91,29 +83,6 @@ export class PowerUpItem {
 			ctx.lineWidth = 1;
 			ctx.stroke();
 			ctx.shadowBlur = 0;
-		}
-	}
-
-	private getIcon(): string {
-		switch (this.type) {
-			case "SPEED_BOOST":
-				return "S";
-			case "DOUBLE_SHOT":
-				return "D";
-			case "SHIELD":
-				return "O";
-			case "TRIPLE_SHOT":
-				return "T";
-			case "MAGNET":
-				return "M";
-			case "BOMB":
-				return "B";
-			case "DRONE_COMPANION":
-				return "C";
-			case "LASER_BEAM":
-				return "L";
-			case "SLOW_MOTION":
-				return "~";
 		}
 	}
 }

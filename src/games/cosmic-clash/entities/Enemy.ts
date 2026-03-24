@@ -1,4 +1,5 @@
 import { CANVAS, ENEMIES } from "../config";
+import { SpriteManager } from "../sprites/SpriteManager";
 import type { EnemyType, Rect } from "../types";
 
 const ENEMY_CONFIGS = ENEMIES;
@@ -163,24 +164,26 @@ export class Enemy {
 			ctx.globalAlpha = 0.6;
 		}
 
-		const color = this.getColor();
+		// Draw sprite
+		const sprite = SpriteManager.getEnemy(this.type);
+		ctx.drawImage(sprite, cx - sprite.width / 2, cy - sprite.height / 2);
 
-		switch (this.type) {
-			case "DRONE":
-				this.drawDrone(ctx, cx, cy, color);
-				break;
-			case "ZIGZAG":
-				this.drawZigzag(ctx, cx, cy, color);
-				break;
-			case "TANK":
-				this.drawTank(ctx, cx, cy, color);
-				break;
-			case "KAMIKAZE":
-				this.drawKamikaze(ctx, cx, cy, color);
-				break;
-			case "TELEPORTER":
-				this.drawTeleporter(ctx, cx, cy, color);
-				break;
+		// Kamikaze glow
+		if (this.type === "KAMIKAZE") {
+			ctx.shadowColor = "#FF6B35";
+			ctx.shadowBlur = 10;
+			ctx.drawImage(sprite, cx - sprite.width / 2, cy - sprite.height / 2);
+			ctx.shadowBlur = 0;
+		}
+
+		// Tank HP bar
+		if (this.type === "TANK" && this.hp < this.maxHp) {
+			const w = this.width / 2;
+			const ratio = this.hp / this.maxHp;
+			ctx.fillStyle = "rgba(0,0,0,0.5)";
+			ctx.fillRect(cx - w, cy - this.height / 2 - 6, this.width, 4);
+			ctx.fillStyle = "#FF3131";
+			ctx.fillRect(cx - w, cy - this.height / 2 - 6, this.width * ratio, 4);
 		}
 
 		ctx.globalAlpha = 1;
@@ -199,78 +202,5 @@ export class Enemy {
 			case "TELEPORTER":
 				return "#AA55FF";
 		}
-	}
-
-	private drawDrone(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string) {
-		// Simple diamond shape
-		const w = this.width / 2;
-		const h = this.height / 2;
-		ctx.beginPath();
-		ctx.moveTo(cx, cy - h);
-		ctx.lineTo(cx + w, cy);
-		ctx.lineTo(cx, cy + h);
-		ctx.lineTo(cx - w, cy);
-		ctx.closePath();
-		ctx.fillStyle = color;
-		ctx.fill();
-	}
-
-	private drawZigzag(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string) {
-		// Arrow shape pointing down
-		const w = this.width / 2;
-		const h = this.height / 2;
-		ctx.beginPath();
-		ctx.moveTo(cx - w, cy - h);
-		ctx.lineTo(cx + w, cy - h);
-		ctx.lineTo(cx, cy + h);
-		ctx.closePath();
-		ctx.fillStyle = color;
-		ctx.fill();
-	}
-
-	private drawTank(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string) {
-		// Chunky rectangle with details
-		const w = this.width / 2;
-		const h = this.height / 2;
-		ctx.fillStyle = color;
-		ctx.fillRect(cx - w, cy - h, this.width, this.height);
-		ctx.fillStyle = "#880000";
-		ctx.fillRect(cx - w + 4, cy - h + 4, this.width - 8, this.height - 8);
-		// HP indicator
-		if (this.hp < this.maxHp) {
-			const ratio = this.hp / this.maxHp;
-			ctx.fillStyle = "rgba(0,0,0,0.5)";
-			ctx.fillRect(cx - w, cy - h - 6, this.width, 4);
-			ctx.fillStyle = "#FF3131";
-			ctx.fillRect(cx - w, cy - h - 6, this.width * ratio, 4);
-		}
-	}
-
-	private drawKamikaze(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string) {
-		// Small circle with trailing effect
-		ctx.beginPath();
-		ctx.arc(cx, cy, this.width / 2, 0, Math.PI * 2);
-		ctx.fillStyle = color;
-		ctx.fill();
-		ctx.shadowColor = color;
-		ctx.shadowBlur = 10;
-		ctx.fill();
-		ctx.shadowBlur = 0;
-	}
-
-	private drawTeleporter(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string) {
-		// Hexagon shape
-		const r = this.width / 2;
-		ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
-			const angle = (Math.PI / 3) * i - Math.PI / 2;
-			const px = cx + r * Math.cos(angle);
-			const py = cy + r * Math.sin(angle);
-			if (i === 0) ctx.moveTo(px, py);
-			else ctx.lineTo(px, py);
-		}
-		ctx.closePath();
-		ctx.fillStyle = color;
-		ctx.fill();
 	}
 }

@@ -18,6 +18,7 @@ import { PowerUpItem, rollEpicPowerUp, rollPowerUpType } from "../entities/Power
 import { ScorePopup } from "../entities/ScorePopup";
 import { ScreenEffects } from "../renderer/Effects";
 import { StarFieldRenderer } from "../renderer/StarField";
+import { SpriteManager } from "../sprites/SpriteManager";
 import { PowerUpSystem } from "../systems/PowerUpSystem";
 import { ScoreSystem } from "../systems/ScoreSystem";
 import { WaveSystem } from "../systems/WaveSystem";
@@ -95,6 +96,7 @@ export class Game {
 
 	start() {
 		this.audio.init();
+		SpriteManager.init();
 		this.state = "playing";
 		this.callbacks.onStateChange("playing");
 		this.reset();

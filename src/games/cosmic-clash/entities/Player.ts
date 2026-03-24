@@ -1,5 +1,6 @@
 import { CANVAS, COLORS, PLAYER } from "../config";
 import type { Input } from "../engine/Input";
+import { SpriteManager } from "../sprites/SpriteManager";
 import type { Rect } from "../types";
 
 export class Player {
@@ -128,38 +129,22 @@ export class Player {
 		const cx = this.centerX;
 		const cy = this.centerY;
 		const w = this.width;
-		const h = this.height;
 
 		// Invincibility flash
 		if (this.isInvincible && Math.floor(Date.now() / 100) % 2 === 0) {
 			ctx.globalAlpha = 0.4;
 		}
 
-		// Thruster flame
-		const flameLen = 8 + Math.sin(this.thrusterPhase) * 4;
-		ctx.beginPath();
-		ctx.moveTo(cx - 6, this.y + h);
-		ctx.lineTo(cx, this.y + h + flameLen);
-		ctx.lineTo(cx + 6, this.y + h);
-		ctx.fillStyle = "#FF6B35";
-		ctx.fill();
+		// Thruster flame sprite (alternating frames)
+		const flame =
+			Math.floor(this.thrusterPhase) % 2 === 0
+				? SpriteManager.playerFlame1
+				: SpriteManager.playerFlame2;
+		ctx.drawImage(flame, cx - flame.width / 2, this.y + this.height - 2);
 
-		// Ship body
-		ctx.beginPath();
-		ctx.moveTo(cx, this.y); // nose
-		ctx.lineTo(this.x + w, this.y + h * 0.8); // right wing
-		ctx.lineTo(cx + 4, this.y + h); // right body
-		ctx.lineTo(cx - 4, this.y + h); // left body
-		ctx.lineTo(this.x, this.y + h * 0.8); // left wing
-		ctx.closePath();
-		ctx.fillStyle = COLORS.PLAYER;
-		ctx.fill();
-
-		// Cockpit
-		ctx.beginPath();
-		ctx.arc(cx, this.y + h * 0.4, 4, 0, Math.PI * 2);
-		ctx.fillStyle = "#FFFFFF";
-		ctx.fill();
+		// Ship sprite
+		const ship = SpriteManager.playerShip;
+		ctx.drawImage(ship, cx - ship.width / 2, this.y);
 
 		// Shield bubble
 		if (this.shieldHits > 0) {
