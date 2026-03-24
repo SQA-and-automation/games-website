@@ -14,8 +14,19 @@ export class ScreenEffects {
 
 	// Boss warning
 	private warningTimer = 0;
-	private warningDuration = 2000; // ms
+	private warningDuration = 2000;
 	showWarning = false;
+
+	// Wave sweep
+	private sweepY = -1;
+	private sweepActive = false;
+	private sweepColor = "#00F0FF";
+
+	// Vignette (cached)
+	private vignetteCanvas: HTMLCanvasElement | null = null;
+
+	// Scan line phase
+	private scanLineOffset = 0;
 
 	shake(intensity: number) {
 		this.shakeIntensity = Math.max(this.shakeIntensity, intensity);
@@ -29,6 +40,12 @@ export class ScreenEffects {
 	startBossWarning() {
 		this.showWarning = true;
 		this.warningTimer = 0;
+	}
+
+	startWaveSweep(color = "#00F0FF") {
+		this.sweepActive = true;
+		this.sweepY = -10;
+		this.sweepColor = color;
 	}
 
 	update(dt: number) {
@@ -56,6 +73,17 @@ export class ScreenEffects {
 				this.showWarning = false;
 			}
 		}
+
+		// Wave sweep
+		if (this.sweepActive) {
+			this.sweepY += 8 * dt;
+			if (this.sweepY > CANVAS.HEIGHT + 20) {
+				this.sweepActive = false;
+			}
+		}
+
+		// Scan lines scroll
+		this.scanLineOffset = (this.scanLineOffset + 0.3 * dt) % 4;
 	}
 
 	draw(ctx: CanvasRenderingContext2D) {
@@ -73,11 +101,9 @@ export class ScreenEffects {
 			const blink = Math.sin(progress * Math.PI * 8) > 0;
 
 			if (blink) {
-				// Darken screen
 				ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
 				ctx.fillRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT);
 
-				// Warning text
 				ctx.font = "bold 28px Orbitron, monospace";
 				ctx.textAlign = "center";
 				ctx.textBaseline = "middle";
@@ -88,11 +114,61 @@ export class ScreenEffects {
 				ctx.fillText("⚠ BOSS INCOMING ⚠", CANVAS.WIDTH / 2, CANVAS.HEIGHT / 2);
 				ctx.shadowBlur = 0;
 
-				// Red border flash
 				ctx.strokeStyle = "rgba(255, 49, 49, 0.5)";
 				ctx.lineWidth = 4;
 				ctx.strokeRect(2, 2, CANVAS.WIDTH - 4, CANVAS.HEIGHT - 4);
 			}
 		}
+
+		// Wave sweep line
+		if (this.sweepActive) {
+			const gradient = ctx.createLinearGradient(0, this.sweepY - 15, 0, this.sweepY + 15);
+			gradient.addColorStop(0, "transparent");
+			gradient.addColorStop(0.4, `${this.sweepColor}40`);
+			gradient.addColorStop(0.5, `${this.sweepColor}CC`);
+			gradient.addColorStop(0.6, `${this.sweepColor}40`);
+			gradient.addColorStop(1, "transparent");
+			ctx.fillStyle = gradient;
+			ctx.fillRect(0, this.sweepY - 15, CANVAS.WIDTH, 30);
+
+			// Bright core line
+			ctx.fillStyle = `${this.sweepColor}`;
+			ctx.fillRect(0, this.sweepY - 0.5, CANVAS.WIDTH, 1);
+		}
+
+		// Scan lines (CRT effect)
+		ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+		const startY = Math.floor(this.scanLineOffset);
+		for (let y = startY; y < CANVAS.HEIGHT; y += 4) {
+			ctx.fillRect(0, y, CANVAS.WIDTH, 1);
+		}
+
+		// Vignette overlay
+		this.drawVignette(ctx);
+	}
+
+	private drawVignette(ctx: CanvasRenderingContext2D) {
+		// Cache the vignette to avoid recreating gradient each frame
+		if (!this.vignetteCanvas) {
+			this.vignetteCanvas = document.createElement("canvas");
+			this.vignetteCanvas.width = CANVAS.WIDTH;
+			this.vignetteCanvas.height = CANVAS.HEIGHT;
+			const vCtx = this.vignetteCanvas.getContext("2d")!;
+
+			const gradient = vCtx.createRadialGradient(
+				CANVAS.WIDTH / 2,
+				CANVAS.HEIGHT / 2,
+				CANVAS.WIDTH * 0.3,
+				CANVAS.WIDTH / 2,
+				CANVAS.HEIGHT / 2,
+				CANVAS.WIDTH * 0.8,
+			);
+			gradient.addColorStop(0, "transparent");
+			gradient.addColorStop(1, "rgba(0, 0, 0, 0.4)");
+			vCtx.fillStyle = gradient;
+			vCtx.fillRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT);
+		}
+
+		ctx.drawImage(this.vignetteCanvas, 0, 0);
 	}
 }

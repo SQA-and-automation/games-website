@@ -12,7 +12,7 @@ import {
 import { Boss } from "../entities/Boss";
 import { Bullet } from "../entities/Bullet";
 import { Enemy } from "../entities/Enemy";
-import { createBulletTrail, createExplosion, type Particle } from "../entities/Particle";
+import { createBulletTrail, createExplosion, Particle } from "../entities/Particle";
 import { Player } from "../entities/Player";
 import { PowerUpItem, rollEpicPowerUp, rollPowerUpType } from "../entities/PowerUp";
 import { ScorePopup } from "../entities/ScorePopup";
@@ -352,10 +352,12 @@ export class Game {
 		) {
 			this.audio.playWaveComplete();
 			this.waveSystem.startBetweenWaves();
+			this.effects.startWaveSweep();
 
 			const nextWave = this.waveSystem.wave + 1;
 			if (nextWave % 5 === 0) {
 				this.showWaveText(`Boss Wave ${nextWave}`);
+				this.effects.startWaveSweep("#FF00E5");
 			} else {
 				this.showWaveText(`Wave ${nextWave}`);
 			}
@@ -412,6 +414,9 @@ export class Game {
 
 					if (!enemy.alive) {
 						this.onEnemyKilled(enemy);
+					} else {
+						// Hit sparks (non-kill)
+						this.spawnHitSparks(bullet.x, bullet.y, enemy.getColor());
 					}
 					break;
 				}
@@ -716,6 +721,9 @@ export class Game {
 		this.scoreSystem.addPowerUp();
 		this.audio.playPowerUp();
 
+		// Collect burst — ring of particles in rarity color
+		this.spawnCollectBurst(item.x, item.y, item.color);
+
 		if (item.type === "BOMB") {
 			for (const enemy of this.enemies) {
 				this.particles.push(...createExplosion(enemy.centerX, enemy.centerY, 6, 2, 400, 2));
@@ -828,22 +836,34 @@ export class Game {
 			ctx.globalAlpha = 1;
 		}
 
-		// Combo indicator
+		// Combo indicator with pulse
 		if (this.scoreSystem.comboMultiplier > 1) {
-			ctx.globalAlpha = 0.8;
-			ctx.font = "bold 16px Orbitron, monospace";
+			const combo = this.scoreSystem.comboMultiplier;
+			const pulse = 1 + Math.sin(performance.now() * 0.006) * 0.12;
+			const fontSize = Math.floor(16 * pulse);
+
+			ctx.globalAlpha = 0.7 + Math.sin(performance.now() * 0.004) * 0.3;
+			ctx.font = `bold ${fontSize}px Orbitron, monospace`;
 			ctx.textAlign = "right";
 			ctx.textBaseline = "top";
-			const comboColor =
-				this.scoreSystem.comboMultiplier >= 4
-					? "#FFD700"
-					: this.scoreSystem.comboMultiplier >= 3
-						? "#FF00E5"
-						: "#00F0FF";
+
+			let comboColor: string;
+			if (combo >= 5) {
+				// Rainbow cycle for mega combo
+				const hue = (performance.now() * 0.2) % 360;
+				comboColor = `hsl(${hue}, 100%, 65%)`;
+			} else if (combo >= 4) {
+				comboColor = "#FFD700";
+			} else if (combo >= 3) {
+				comboColor = "#FF00E5";
+			} else {
+				comboColor = "#00F0FF";
+			}
+
 			ctx.fillStyle = comboColor;
 			ctx.shadowColor = comboColor;
-			ctx.shadowBlur = 8;
-			ctx.fillText(`COMBO x${this.scoreSystem.comboMultiplier}`, CANVAS.WIDTH - 10, 50);
+			ctx.shadowBlur = 10 + Math.sin(performance.now() * 0.008) * 6;
+			ctx.fillText(`COMBO x${combo}`, CANVAS.WIDTH - 10, 50);
 			ctx.shadowBlur = 0;
 			ctx.globalAlpha = 1;
 		}
@@ -889,6 +909,36 @@ export class Game {
 			ctx.shadowBlur = 6;
 			ctx.fill();
 			ctx.shadowBlur = 0;
+		}
+	}
+
+	// === VISUAL JUICE HELPERS ===
+
+	private spawnHitSparks(x: number, y: number, color: string) {
+		for (let i = 0; i < 4; i++) {
+			const angle = Math.random() * Math.PI * 2;
+			const speed = 1.5 + Math.random() * 2;
+			this.particles.push(
+				new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed - 1, 200, 1.5, color),
+			);
+		}
+	}
+
+	private spawnCollectBurst(x: number, y: number, color: string) {
+		// Ring of particles expanding outward
+		for (let i = 0; i < 10; i++) {
+			const angle = (Math.PI * 2 * i) / 10;
+			const speed = 2.5;
+			this.particles.push(
+				new Particle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, 400, 2.5, color),
+			);
+		}
+		// Inner sparkle
+		for (let i = 0; i < 5; i++) {
+			const angle = Math.random() * Math.PI * 2;
+			this.particles.push(
+				new Particle(x, y, Math.cos(angle) * 1, Math.sin(angle) * 1, 300, 1.5, "#FFFFFF"),
+			);
 		}
 	}
 }

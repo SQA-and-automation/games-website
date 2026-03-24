@@ -36,6 +36,8 @@ export class Enemy {
 
 	// Visual
 	private flashTimer = 0;
+	private spawnFade = 0; // 0..1 for spawn animation
+	private spawnScale = 0.5;
 
 	constructor(type: EnemyType, x: number, y: number) {
 		const cfg = ENEMY_CONFIGS[type];
@@ -78,6 +80,12 @@ export class Enemy {
 		this.age += dt * slowFactor;
 		this.fireTimer += dt * slowFactor * 16.67; // convert to ms-ish
 		this.flashTimer = Math.max(0, this.flashTimer - dt);
+
+		// Spawn fade-in
+		if (this.spawnFade < 1) {
+			this.spawnFade = Math.min(1, this.spawnFade + 0.08 * dt);
+			this.spawnScale = 0.5 + this.spawnFade * 0.5;
+		}
 
 		const effectiveSpeed = this.speed * slowFactor;
 
@@ -154,9 +162,14 @@ export class Enemy {
 		const cx = this.centerX;
 		const cy = this.centerY;
 
+		// Spawn fade-in
+		if (this.spawnFade < 1) {
+			ctx.globalAlpha = this.spawnFade;
+		}
+
 		// Teleporter fade
 		if (this.type === "TELEPORTER") {
-			ctx.globalAlpha = this.teleportAlpha;
+			ctx.globalAlpha *= this.teleportAlpha;
 		}
 
 		// Hit flash
@@ -164,15 +177,17 @@ export class Enemy {
 			ctx.globalAlpha = 0.6;
 		}
 
-		// Draw sprite
+		// Draw sprite with spawn scale
 		const sprite = SpriteManager.getEnemy(this.type);
-		ctx.drawImage(sprite, cx - sprite.width / 2, cy - sprite.height / 2);
+		const sw = sprite.width * this.spawnScale;
+		const sh = sprite.height * this.spawnScale;
+		ctx.drawImage(sprite, cx - sw / 2, cy - sh / 2, sw, sh);
 
 		// Kamikaze glow
 		if (this.type === "KAMIKAZE") {
 			ctx.shadowColor = "#FF6B35";
 			ctx.shadowBlur = 10;
-			ctx.drawImage(sprite, cx - sprite.width / 2, cy - sprite.height / 2);
+			ctx.drawImage(sprite, cx - sw / 2, cy - sh / 2, sw, sh);
 			ctx.shadowBlur = 0;
 		}
 
