@@ -1,15 +1,28 @@
 import { ROAD, SCREEN, type ZONES } from "../config";
 import type { Road } from "../engine/Road";
 
-const HORIZON_Y = Math.floor(SCREEN.HEIGHT * 0.4);
-const CAM_HEIGHT = 150;
-const CAM_DEPTH = 120;
-const ROAD_HALF_W = 0.45; // fraction of screen width at z=1
+// Shared projection constants — MUST be used by item drawing too
+export const HORIZON_Y = Math.floor(SCREEN.HEIGHT * 0.4); // 288
+export const Z_SCALE = 450; // z = Z_SCALE / (y - HORIZON_Y)
+export const ROAD_BASE_W = 220; // road half-width at z=1
 
 /**
- * Scanline-based pseudo-3D road renderer.
- * Draws the road line by line from bottom of screen to horizon.
+ * Convert segment offset (distance ahead) to screen Y.
  */
+export function segToScreenY(offset: number): number {
+	if (offset <= 0) return SCREEN.HEIGHT + 100;
+	const perspective = Z_SCALE / offset;
+	return HORIZON_Y + perspective;
+}
+
+/**
+ * Get road half-width at a given z (segment offset distance).
+ */
+export function roadWidthAtZ(z: number): number {
+	if (z <= 0) return ROAD_BASE_W;
+	return ROAD_BASE_W / z;
+}
+
 export class RoadRenderer {
 	private ctx: CanvasRenderingContext2D;
 
@@ -30,97 +43,59 @@ export class RoadRenderer {
 		const baseSegment = Math.floor(position);
 		const segFrac = position - baseSegment;
 
-		// Accumulate curve offset
 		let curveDx = 0;
 
 		// Draw scanlines from bottom to horizon
 		for (let y = SCREEN.HEIGHT; y > HORIZON_Y; y--) {
-			// How far into the distance is this screen row?
 			const perspective = y - HORIZON_Y;
 			if (perspective <= 0) break;
 
-			const z = (CAM_HEIGHT * CAM_DEPTH) / perspective;
+			// z = distance in "segment units" from camera
+			const z = Z_SCALE / perspective;
 
-			// Which road segment does this z correspond to?
+			// Which road segment?
 			const segOffset = z + segFrac;
 			const segIndex = baseSegment + Math.floor(segOffset);
-
-			// Get zone colors
 			const { zone } = road.getZone(segIndex);
 
-			// Road width at this distance (wider near, narrower far)
-			const roadW = (ROAD_HALF_W * SCREEN.WIDTH) / (z * 0.08);
+			// Road width
+			const halfW = ROAD_BASE_W / z;
 
-			// Accumulate curve
+			// Curve accumulation
 			const curve = road.getCurve(segIndex);
-			curveDx += curve * (1 / perspective) * 40;
+			curveDx += (curve / perspective) * 30;
 
-			// Road center X
-			const centerX = SCREEN.WIDTH / 2 + curveDx - playerX * roadW * 0.5;
+			// Road center
+			const cx = SCREEN.WIDTH / 2 + curveDx - playerX * halfW * 0.6;
 
-			// Rumble pattern (alternating colors)
 			const isRumble = Math.floor(segIndex / ROAD.RUMBLE_LENGTH) % 2 === 0;
 
-			// Draw grass
+			// Grass
 			ctx.fillStyle = zone.grassColor;
 			ctx.fillRect(0, y, SCREEN.WIDTH, 1);
 
-			// Draw road surface
-			const roadLeft = centerX - roadW;
-			const roadRight = centerX + roadW;
+			// Road
 			ctx.fillStyle = zone.roadColor;
-			ctx.fillRect(roadLeft, y, roadRight - roadLeft, 1);
+			ctx.fillRect(cx - halfW, y, halfW * 2, 1);
 
-			// Rumble strips (road edges)
+			// Rumble strips
 			if (isRumble) {
-				const rumbleW = Math.max(1, roadW * 0.06);
+				const rw = Math.max(1, halfW * 0.08);
 				ctx.fillStyle = zone.rumbleColor;
-				ctx.fillRect(roadLeft - rumbleW, y, rumbleW, 1);
-				ctx.fillRect(roadRight, y, rumbleW, 1);
+				ctx.fillRect(cx - halfW - rw, y, rw, 1);
+				ctx.fillRect(cx + halfW, y, rw, 1);
 			}
 
 			// Lane markings
-			if (!isRumble && roadW > 15) {
+			if (!isRumble && halfW > 8) {
 				ctx.fillStyle = zone.laneColor;
-				const laneW = Math.max(1, roadW * 0.01);
+				const lw = Math.max(1, halfW * 0.015);
 				for (let lane = 1; lane < ROAD.LANES; lane++) {
-					const lx = roadLeft + (roadRight - roadLeft) * (lane / ROAD.LANES);
-					ctx.fillRect(lx - laneW / 2, y, laneW, 1);
+					const lx = cx - halfW + (halfW * 2 * lane) / ROAD.LANES;
+					ctx.fillRect(lx - lw / 2, y, lw, 1);
 				}
 			}
 		}
-	}
-
-	/**
-	 * Get the road center X and half-width for a given screen Y.
-	 * Used by Game to position items and check collisions.
-	 */
-	getRoadAtY(
-		y: number,
-		position: number,
-		playerX: number,
-		road: Road,
-	): { centerX: number; halfWidth: number; segIndex: number } | null {
-		if (y <= HORIZON_Y) return null;
-		const perspective = y - HORIZON_Y;
-		const z = (CAM_HEIGHT * CAM_DEPTH) / perspective;
-		const baseSegment = Math.floor(position);
-		const segFrac = position - baseSegment;
-		const segIndex = baseSegment + Math.floor(z + segFrac);
-		const roadW = (ROAD_HALF_W * SCREEN.WIDTH) / (z * 0.08);
-
-		// Approximate curve offset at this Y (simplified)
-		let curveDx = 0;
-		for (let sy = SCREEN.HEIGHT; sy > y; sy -= 4) {
-			const p = sy - HORIZON_Y;
-			if (p <= 0) break;
-			const sz = (CAM_HEIGHT * CAM_DEPTH) / p;
-			const si = baseSegment + Math.floor(sz + segFrac);
-			curveDx += road.getCurve(si) * (1 / p) * 40;
-		}
-
-		const centerX = SCREEN.WIDTH / 2 + curveDx - playerX * roadW * 0.5;
-		return { centerX, halfWidth: roadW, segIndex };
 	}
 
 	drawHorizonGlow(zone: (typeof ZONES)[number], time: number) {
@@ -146,15 +121,13 @@ export class RoadRenderer {
 		ctx.lineWidth = 1;
 		for (let i = 0; i < 6; i++) {
 			const x = Math.random() * SCREEN.WIDTH;
-			const y1 = HORIZON_Y + Math.random() * (SCREEN.HEIGHT - HORIZON_Y) * 0.5;
+			const y = HORIZON_Y + Math.random() * (SCREEN.HEIGHT - HORIZON_Y) * 0.5;
 			const len = 15 + intensity * 30;
 			ctx.beginPath();
-			ctx.moveTo(x, y1);
-			ctx.lineTo(x + (x - SCREEN.WIDTH / 2) * 0.03, y1 + len);
+			ctx.moveTo(x, y);
+			ctx.lineTo(x + (x - SCREEN.WIDTH / 2) * 0.03, y + len);
 			ctx.stroke();
 		}
 		ctx.globalAlpha = 1;
 	}
 }
-
-export { HORIZON_Y };

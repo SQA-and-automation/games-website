@@ -9,7 +9,13 @@ import {
 	VEHICLES,
 	type VehicleId,
 } from "../config";
-import { HORIZON_Y, RoadRenderer } from "../renderer/RoadRenderer";
+import {
+	HORIZON_Y,
+	ROAD_BASE_W,
+	RoadRenderer,
+	roadWidthAtZ,
+	segToScreenY,
+} from "../renderer/RoadRenderer";
 import type { ActivePowerUp, GameCallbacks, GameState, GameStats, SavedData } from "../types";
 import { Road } from "./Road";
 
@@ -300,8 +306,8 @@ export class Game {
 	}
 
 	private spawnItems(cycleNum: number) {
-		const ahead = this.distance + 80;
-		const start = this.distance + 15;
+		const ahead = this.distance + 45;
+		const start = this.distance + 3;
 		const diffMult = 1 + cycleNum * 0.3;
 
 		for (let i = start; i < ahead; i++) {
@@ -487,47 +493,47 @@ export class Game {
 
 	private drawItems() {
 		const ctx = this.ctx;
-		// Draw items for nearby segments — position them at the screen Y based on their distance
-		for (let offset = 60; offset >= -2; offset--) {
+		const frac = this.position - Math.floor(this.position);
+
+		// Draw items from far to near (painter's order)
+		for (let offset = 50; offset >= 1; offset--) {
 			const segIdx = this.distance + offset;
-			if (offset < 0) continue;
+			const z = offset + frac;
+			if (z <= 0.5) continue;
 
-			// Calculate screen Y for this segment distance
-			const zDist = offset + (this.position - Math.floor(this.position));
-			if (zDist <= 0) continue;
-			const perspective = (150 * 120) / (zDist * ROAD.SEGMENT_LENGTH);
-			const screenY = HORIZON_Y + perspective;
-			if (screenY > SCREEN.HEIGHT || screenY < HORIZON_Y) continue;
+			// Use same projection as road renderer
+			const screenY = segToScreenY(z);
+			if (screenY > SCREEN.HEIGHT - 50 || screenY < HORIZON_Y + 2) continue;
 
-			// Road width at this Y
-			const roadW = (0.45 * SCREEN.WIDTH) / ((zDist * ROAD.SEGMENT_LENGTH * 0.08) / 120);
-			const scale = roadW / (SCREEN.WIDTH * 0.45);
+			const halfW = roadWidthAtZ(z);
+			const scale = halfW / ROAD_BASE_W; // 0..1 scale factor
+			if (scale < 0.02) continue; // too small to draw
 
-			// Road center at this Y (simplified — no curve accumulation for items)
-			const centerX = SCREEN.WIDTH / 2 - this.playerX * roadW * 0.5;
+			const centerX = SCREEN.WIDTH / 2 - this.playerX * halfW * 0.6;
 
 			// Traffic
 			const traffic = this.road.getTraffic(segIdx);
 			if (traffic) {
-				const carX = centerX + traffic.offset * roadW;
-				const carW = Math.max(3, 18 * scale);
-				const carH = Math.max(4, 24 * scale);
-				const color = this.getTrafficColor(traffic.type);
-				ctx.fillStyle = color;
+				const carX = centerX + traffic.offset * halfW;
+				const carW = Math.max(2, 16 * scale);
+				const carH = Math.max(3, 22 * scale);
+				ctx.fillStyle = this.getTrafficColor(traffic.type);
 				ctx.fillRect(carX - carW / 2, screenY - carH, carW, carH);
 				// Tail lights
-				ctx.fillStyle = "#FF3131";
-				const tlS = Math.max(1, 2 * scale);
-				ctx.fillRect(carX - carW / 2 + 1, screenY - tlS - 1, tlS, tlS);
-				ctx.fillRect(carX + carW / 2 - tlS - 1, screenY - tlS - 1, tlS, tlS);
+				if (scale > 0.1) {
+					ctx.fillStyle = "#FF3131";
+					const tl = Math.max(1, 2 * scale);
+					ctx.fillRect(carX - carW / 2 + 1, screenY - tl - 1, tl, tl);
+					ctx.fillRect(carX + carW / 2 - tl - 1, screenY - tl - 1, tl, tl);
+				}
 			}
 
 			// Coins
 			if (this.road.hasCoin(segIdx)) {
-				const coinR = Math.max(2, 4 * scale);
+				const r = Math.max(1.5, 4 * scale);
 				const pulse = 1 + Math.sin(this.time * 0.005 + segIdx) * 0.2;
 				ctx.beginPath();
-				ctx.arc(centerX, screenY - coinR * 2, coinR * pulse, 0, Math.PI * 2);
+				ctx.arc(centerX, screenY - r * 2, r * pulse, 0, Math.PI * 2);
 				ctx.fillStyle = "#FFD700";
 				ctx.fill();
 			}
@@ -535,10 +541,10 @@ export class Game {
 			// Power-ups
 			const pu = this.road.getPowerUp(segIdx);
 			if (pu) {
-				const puR = Math.max(3, 5 * scale);
-				const color = POWERUPS_CFG.TYPES[pu as PowerUpId]?.color ?? "#FFFFFF";
+				const r = Math.max(2, 5 * scale);
+				const color = POWERUPS_CFG.TYPES[pu as PowerUpId]?.color ?? "#FFF";
 				ctx.beginPath();
-				ctx.arc(centerX, screenY - puR * 2, puR, 0, Math.PI * 2);
+				ctx.arc(centerX, screenY - r * 2, r, 0, Math.PI * 2);
 				ctx.fillStyle = `${color}80`;
 				ctx.fill();
 				ctx.strokeStyle = color;
